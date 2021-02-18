@@ -1,0 +1,66 @@
+# directories:
+# - /compile/doc/chromeos - the files in this dir
+# - /compile/source/linux-chromeos-4.4 - the kernel sources checked out from gitrepo
+# - /compile/result/chromeosup - the resulting kernel, modules etc. tar.gz files
+# name: stb-404
+
+# IMPORTANT: this is work in progress and not yet ready to use!
+# status: not yet known
+# credits go to https://github.com/eballetbo/linux.git
+#        and to https://github.com/eballetbo/chromebooks.git
+
+# INFO: based on the tree commit: 86a113a4c07724e8fe0e5ddb10ba599735316682
+#                    from branch: release-R89-13729.B-chromeos-4.4
+
+# patches:
+# none yet
+
+cp /compile/doc/chromeos/config.404 /compile/source/linux-chromeos-4.4/.config
+cd /compile/source/linux-chromeos-4.4
+
+export ARCH=arm64
+make defconfig
+/compile/doc/chromeos/misc.404/options/enable-docker-options.sh
+/compile/doc/chromeos/misc.404/options/enable-additional-options.sh
+#/compile/doc/chromeos/misc.404/options/remove-unused-options.sh
+make oldconfig
+make -j 4 Image dtbs modules
+cd tools/perf
+make
+cd ../power/cpupower
+make
+cd ../../..
+export kver=`make kernelrelease`
+echo ${kver}
+# remove debug info if there and not wanted
+#find . -type f -name '*.ko' | sudo xargs -n 1 objcopy --strip-unneeded
+make modules_install
+mkdir -p /lib/modules/${kver}/tools
+cp -v tools/perf/perf /lib/modules/${kver}/tools
+cp -v tools/power/cpupower/cpupower /lib/modules/${kver}/tools
+cp -v tools/power/cpupower/libcpupower.so.0.0.1 /lib/modules/${kver}/tools/libcpupower.so.0
+# make headers_install INSTALL_HDR_PATH=/usr
+cp -v .config /boot/config-${kver}
+cp -v arch/arm64/boot/Image /boot/Image-${kver}
+mkdir -p /boot/dtb-${kver}
+cp -v arch/arm64/boot/dts/rockchip/rk3399-gru-*.dtb /boot/dtb-${kver}
+cp -v arch/arm64/boot/dts/mediatek/mt8173-elm-*.dtb /boot/dtb-${kver}
+cp -v System.map /boot/System.map-${kver}
+# start chromebook special - required: apt-get install liblz4-tool vboot-kernel-utils
+cp arch/arm64/boot/Image Image
+lz4 -f Image Image.lz4
+cp /compile/doc/chromeos/misc.404/misc/cmdline cmdline
+dd if=/dev/zero of=bootloader.bin bs=512 count=1
+mkimage -D "-I dts -O dtb -p 2048" -f auto -A arm64 -O linux -T kernel -C lz4 -a 0 -d Image.lz4 -b arch/arm64/boot/dts/rockchip/rk3399-gru-bob-r0.dtb -b arch/arm64/boot/dts/rockchip/rk3399-gru-bob-r2.dtb -b arch/arm64/boot/dts/rockchip/rk3399-gru-bob-r4.dtb -b arch/arm64/boot/dts/rockchip/rk3399-gru-kevin-r5.dtb -b arch/arm64/boot/dts/rockchip/rk3399-gru-kevin-r6.dtb -b arch/arm64/boot/dts/mediatek/mt8173-elm-rev0.dtb -b arch/arm64/boot/dts/mediatek/mt8173-elm-rev1.dtb -b arch/arm64/boot/dts/mediatek/mt8173-elm-rev3.dtb kernel.itb
+vbutil_kernel --pack vmlinux.kpart --keyblock /usr/share/vboot/devkeys/kernel.keyblock --signprivate /usr/share/vboot/devkeys/kernel_data_key.vbprivk --version 1 --config cmdline --bootloader bootloader.bin --vmlinuz kernel.itb --arch arm
+cp -v vmlinux.kpart /boot/vmlinux.kpart-${kver}
+rm -f Image Image.lz4 cmdline bootloader.bin kernel.itb vmlinux.kpart
+# end chromebook special
+cd /boot
+update-initramfs -c -k ${kver}
+#mkimage -A arm64 -O linux -T ramdisk -a 0x0 -e 0x0 -n initrd.img-${kver} -d initrd.img-${kver} uInitrd-${kver}
+tar cvzf /compile/source/linux-chromeos-4.4/${kver}.tar.gz /boot/*-${kver} /lib/modules/${kver}
+cp -v /compile/doc/chromeos/config.404 /compile/doc/chromeos/config.404.old
+cp -v /compile/source/linux-chromeos-4.4/.config /compile/doc/chromeos/config.404
+cp -v /compile/source/linux-chromeos-4.4/.config /compile/doc/chromeos/config.404-${kver}
+cp -v /compile/source/linux-chromeos-4.4/*.tar.gz /compile/result/chromeos
