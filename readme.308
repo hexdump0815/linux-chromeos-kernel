@@ -37,6 +37,8 @@ patch -p1 < /compile/doc/chromeos/misc.308/patches/module-compile-fix.patch
 patch -p1 < /compile/doc/chromeos/misc.308/patches/r68-fixes.patch
 # fix perf compile
 patch -p1 < /compile/doc/chromeos/misc.308/patches/fix-perf-compile.patch
+# remove some compiler warnings
+patch -p1 < /compile/doc/chromeos/misc.308/patches/remove-some-compiler-warnings.patch
 # get mali working
 mv drivers/gpu/arm/midgard drivers/gpu/arm/midgard.org
 tar xzf /compile/doc/chromeos/misc.308/patches/mali-patches/cbe-mali-r12p0.tar.gz
@@ -62,6 +64,7 @@ cd /compile/source/linux-chromeos-3.8
 cp include/linux/compiler-gcc5.h include/linux/compiler-gcc6.h
 cp include/linux/compiler-gcc5.h include/linux/compiler-gcc7.h
 cp include/linux/compiler-gcc5.h include/linux/compiler-gcc8.h
+cp include/linux/compiler-gcc5.h include/linux/compiler-gcc9.h
 export ARCH=arm
 # seems to be no longer needed
 #export WIFIVERSION=-3.8
@@ -71,6 +74,8 @@ make prepare
 /compile/doc/chromeos/misc.308/options/enable-additional-options.sh
 #/compile/doc/chromeos/misc.308/options/remove-unused-options.sh
 make oldconfig
+# for compiling with a certain gcc version use
+#make HOSTCC=gcc-5 CC=gcc-5 -j 4 zImage dtbs modules
 make -j 4 zImage dtbs modules
 cd tools/perf
 # without this it would fail on warnings
