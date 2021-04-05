@@ -1,0 +1,41 @@
+diff --git a/drivers/gpu/drm/exynos/exynos_hdmi.c b/drivers/gpu/drm/exynos/exynos_hdmi.c
+index 14f8568..f645454 100644
+--- a/drivers/gpu/drm/exynos/exynos_hdmi.c
++++ b/drivers/gpu/drm/exynos/exynos_hdmi.c
+@@ -2457,6 +2457,14 @@ static void hdmi_4210_mode_set(struct hdmi_context *hdata)
+ 	struct hdmi_tg_regs *tg = &hdata->mode_conf.conf.v4210_conf.tg;
+ 	struct drm_display_mode *m = &hdata->current_mode;
+ 	unsigned int val;
++	int hcorrect = 0;
++	int vcorrect = 0;
++
++	if (m->vdisplay == 768 || m->vdisplay == 1024) {
++		pr_info("exynos-drm: Applying 257px timings hack\n");
++		hcorrect = 257;
++		vcorrect = 1;
++	}
+ 
+ 	DRM_DEBUG_KMS("[MODE:%s]\n", m->name);
+ 
+@@ -2509,8 +2517,8 @@ static void hdmi_4210_mode_set(struct hdmi_context *hdata)
+ 			(m->hsync_start - m->hdisplay)) << 12;
+ 		hdmi_set_reg(core->v_sync_gen3, 3, val);
+ 
+-		hdmi_set_reg(tg->vact_st, 2, (m->vtotal - m->vdisplay) / 2);
+-		hdmi_set_reg(tg->vact_sz, 2, m->vdisplay / 2);
++		hdmi_set_reg(tg->vact_st, 2, (m->vtotal - m->vdisplay) - vcorrect);
++		hdmi_set_reg(tg->vact_sz, 2, m->vdisplay + vcorrect);
+ 
+ 		hdmi_set_reg(tg->vact_st2, 2, 0x249);/* Reset value + 1*/
+ 	} else {
+@@ -2536,8 +2544,8 @@ static void hdmi_4210_mode_set(struct hdmi_context *hdata)
+ 	/* Timing generator registers */
+ 	hdmi_set_reg(tg->cmd, 1, 0x0);
+ 	hdmi_set_reg(tg->h_fsz, 2, m->htotal);
+-	hdmi_set_reg(tg->hact_st, 2, m->htotal - m->hdisplay);
+-	hdmi_set_reg(tg->hact_sz, 2, m->hdisplay);
++	hdmi_set_reg(tg->hact_st, 2, (m->htotal - m->hdisplay) - hcorrect);
++	hdmi_set_reg(tg->hact_sz, 2, m->hdisplay + hcorrect);
+ 	hdmi_set_reg(tg->v_fsz, 2, m->vtotal);
+ 	hdmi_set_reg(tg->vsync, 2, 0x1);
+ 	hdmi_set_reg(tg->vsync2, 2, 0x233); /* Reset value */

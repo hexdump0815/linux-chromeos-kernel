@@ -1,0 +1,34 @@
+--- mm/swapfile.c.org	2017-07-25 20:34:58.031898694 +0200
++++ mm/swapfile.c	2017-07-25 20:37:20.428038737 +0200
+@@ -2164,17 +2164,8 @@
+ static int claim_swapfile(struct swap_info_struct *p, struct inode *inode)
+ {
+ 	int error;
+-	/* On Chromium OS, we only support zram swap devices. */
+ 	if (S_ISBLK(inode->i_mode)) {
+-		char name[BDEVNAME_SIZE];
+ 		p->bdev = bdgrab(I_BDEV(inode));
+-		bdevname(p->bdev, name);
+-		if (strncmp(name, "zram", strlen("zram")) &&
+-		    strncmp(name, "ram", strlen("ram"))) {
+-			bdput(p->bdev);
+-			p->bdev = NULL;
+-			return -EINVAL;
+-		}
+ 		error = blkdev_get(p->bdev,
+ 				   FMODE_READ | FMODE_WRITE | FMODE_EXCL,
+ 				   sys_swapon);
+@@ -2187,13 +2178,11 @@
+ 		if (error < 0)
+ 			return error;
+ 		p->flags |= SWP_BLKDEV;
+-#if 0
+ 	} else if (S_ISREG(inode->i_mode)) {
+ 		p->bdev = inode->i_sb->s_bdev;
+ 		mutex_lock(&inode->i_mutex);
+ 		if (IS_SWAPFILE(inode))
+ 			return -EBUSY;
+-#endif
+ 	} else
+ 		return -EINVAL;
+ 

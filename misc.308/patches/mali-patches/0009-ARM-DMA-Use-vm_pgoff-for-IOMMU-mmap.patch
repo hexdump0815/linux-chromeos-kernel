@@ -1,0 +1,58 @@
+From d827fa9f5de0e6dc12aeaf573e71ad134d8e9a99 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?=C3=98rjan=20Eide?= <orjan.eide@arm.com>
+Date: Thu, 12 Mar 2015 12:12:06 +0100
+Subject: [PATCH 9/9] ARM: DMA: Use vm_pgoff for IOMMU mmap
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+arm_iommu_mmap_attrs() ignores the page offset in vma->vm_pgoff that was
+specified in the mmap call. Any user of dma_mmap_* will get an
+unexpected result when the device uses the IOMMU DMA ops.
+
+Some DRM driver that use dma_mmap_* seems to depend on it ignoring
+vma->vm_pgoff.  Both the Samsung Exynos DRM driver before v3.18, and the
+current Rockchip DRM driver, use the page offset to pass GEM cookies
+that are used to look up the GEM buffers and then call dma_mmap_attrs()
+with the cookie value still in vma->vm_pgoff.
+
+rockchip_gem_mmap_buf() in drivers/gpu/drm/rockchip/rockchip_drm_gem.c
+still does this. It should be fixed before fixing
+arm_iommu_mmap_attrs().
+
+Signed-off-by: Ørjan Eide <orjan.eide@arm.com>
+Tested-by: Daniel Kurtz <djkurtz@chromium.org>
+Signed-off-by: Guillaume Tucker <guillaume.tucker@arm.com>
+---
+ arch/arm/mm/dma-mapping.c | 8 +++++++-
+ 1 file changed, 7 insertions(+), 1 deletion(-)
+
+diff --git a/arch/arm/mm/dma-mapping.c b/arch/arm/mm/dma-mapping.c
+index e68a9e2..754f419 100644
+--- a/arch/arm/mm/dma-mapping.c
++++ b/arch/arm/mm/dma-mapping.c
+@@ -1364,6 +1364,9 @@ static int arm_iommu_mmap_attrs(struct device *dev, struct vm_area_struct *vma,
+ {
+ 	unsigned long uaddr = vma->vm_start;
+ 	unsigned long usize = vma->vm_end - vma->vm_start;
++	unsigned long nr_vma_pages = usize >> PAGE_SHIFT;
++	unsigned long nr_pages = PAGE_ALIGN(size) >> PAGE_SHIFT;
++	unsigned long off = vma->vm_pgoff;
+ 	struct page **pages = __iommu_get_pages(cpu_addr, attrs);
+ 
+ 	vma->vm_page_prot = __get_dma_pgprot(attrs, vma->vm_page_prot);
+@@ -1371,7 +1374,10 @@ static int arm_iommu_mmap_attrs(struct device *dev, struct vm_area_struct *vma,
+ 	if (!pages)
+ 		return -ENXIO;
+ 
+-	pages += vma->vm_pgoff;
++	if (off >= nr_pages || nr_vma_pages > (nr_pages - off))
++		return -ENXIO;
++
++	pages += off;
+ 
+ 	do {
+ 		int ret = vm_insert_page(vma, uaddr, *pages++);
+-- 
+1.9.1
+

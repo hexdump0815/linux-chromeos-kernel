@@ -1,0 +1,30 @@
+From 815e0e851d37762bb84bfb90899c7934e7ced299 Mon Sep 17 00:00:00 2001
+From: Guillaume Tucker <guillaume.tucker@arm.com>
+Date: Thu, 28 Aug 2014 13:47:20 +0100
+Subject: [PATCH 4/9] CHROMIUM: CONFIG: exynos5: build MALI_MIDGARD as module
+
+It is useful for development purposes to be able to rebuild and
+load a different kernel-side Mali GPU driver, so this is now the
+default.
+
+Signed-off-by: Guillaume Tucker <guillaume.tucker@arm.com>
+---
+ chromeos/config/armel/chromeos-exynos5.flavour.config | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/chromeos/config/armel/chromeos-exynos5.flavour.config b/chromeos/config/armel/chromeos-exynos5.flavour.config
+index 05e3e1b..888b22e 100644
+--- a/chromeos/config/armel/chromeos-exynos5.flavour.config
++++ b/chromeos/config/armel/chromeos-exynos5.flavour.config
+@@ -170,7 +170,7 @@ CONFIG_MACH_EXYNOS5_DT=y
+ # CONFIG_MALI_DEVFREQ is not set
+ CONFIG_MALI_EXPERT=y
+ # CONFIG_MALI_GATOR_SUPPORT is not set
+-CONFIG_MALI_MIDGARD=y
++CONFIG_MALI_MIDGARD=m
+ CONFIG_MALI_MIDGARD_DEBUG_SYS=y
+ CONFIG_MALI_MIDGARD_DVFS=y
+ # CONFIG_MALI_MIDGARD_ENABLE_TRACE is not set
+-- 
+1.9.1
+

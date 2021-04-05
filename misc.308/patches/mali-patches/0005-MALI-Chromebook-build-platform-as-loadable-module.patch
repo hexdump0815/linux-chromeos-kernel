@@ -1,0 +1,27 @@
+From 3a5199f373dc66158f94b4cef5e375846deb8df8 Mon Sep 17 00:00:00 2001
+From: Guillaume Tucker <guillaume.tucker@arm.com>
+Date: Thu, 28 Aug 2014 13:20:53 +0100
+Subject: [PATCH 5/9] MALI: Chromebook: build platform as loadable module
+
+Update Chromebook Mali Midgard GPU platform Kbuild file so it can
+be built it as a lodable module.  This is required in order to
+build the main Mali driver as a module as well.
+
+Signed-off-by: Guillaume Tucker <guillaume.tucker@arm.com>
+---
+ drivers/gpu/arm/midgard/platform/chromebook/Kbuild | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/gpu/arm/midgard/platform/chromebook/Kbuild b/drivers/gpu/arm/midgard/platform/chromebook/Kbuild
+index df70f1a..20de0ca 100644
+--- a/drivers/gpu/arm/midgard/platform/chromebook/Kbuild
++++ b/drivers/gpu/arm/midgard/platform/chromebook/Kbuild
+@@ -15,4 +15,4 @@
+ 
+ SRC += $(MALI_PLATFORM_THIRDPARTY_DIR)/mali_kbase_config_chromebook.c
+ 
+-obj-y += mali_kbase_config_chromebook.o
++obj-y += $(MALI_PLATFORM_THIRDPARTY_DIR)/mali_kbase_config_chromebook.o
+-- 
+1.9.1
+

@@ -1,0 +1,52 @@
+From e73f9782265ef42e9ce187f6a52050f4839d1354 Mon Sep 17 00:00:00 2001
+From: Grzegorz Prajsner <grzegorz.prajsner@arm.com>
+Date: Thu, 10 Sep 2015 18:17:11 +0100
+Subject: [PATCH 8/9] drm/exynos: add fb_dmabuf_export implementation
+
+Add dma-buf support based on Odroid XU3 implementation.
+
+Signed-off-by: Guillaume Tucker <guillaume.tucker@arm.com>
+---
+ drivers/gpu/drm/exynos/exynos_drm_fbdev.c | 19 +++++++++++++++++++
+ 1 file changed, 19 insertions(+)
+
+diff --git a/drivers/gpu/drm/exynos/exynos_drm_fbdev.c b/drivers/gpu/drm/exynos/exynos_drm_fbdev.c
+index 02fd32d..d2d3bb8 100644
+--- a/drivers/gpu/drm/exynos/exynos_drm_fbdev.c
++++ b/drivers/gpu/drm/exynos/exynos_drm_fbdev.c
+@@ -68,6 +68,24 @@ static int exynos_drm_fb_mmap(struct fb_info *info,
+ 	return 0;
+ }
+ 
++static struct dma_buf *exynos_fb_get_dma_buf(struct fb_info *info)
++{
++	struct dma_buf *buf = NULL;
++	struct drm_fb_helper *helper = info->par;
++	struct drm_device *dev = helper->dev;
++	struct exynos_drm_fbdev *exynos_fbd = to_exynos_fbdev(helper);
++	struct exynos_drm_gem_obj *exynos_gem_obj = exynos_fbd->exynos_gem_obj;
++
++	if (dev->driver->gem_prime_export) {
++		buf = dev->driver->gem_prime_export(dev, &exynos_gem_obj->base,
++			O_RDWR);
++		if (buf)
++			drm_gem_object_reference(&exynos_gem_obj->base);
++	}
++
++	return buf;
++}
++
+ static struct fb_ops exynos_drm_fb_ops = {
+ 	.owner		= THIS_MODULE,
+ 	.fb_mmap        = exynos_drm_fb_mmap,
+@@ -79,6 +97,7 @@ static struct fb_ops exynos_drm_fb_ops = {
+ 	.fb_blank	= drm_fb_helper_blank,
+ 	.fb_pan_display	= drm_fb_helper_pan_display,
+ 	.fb_setcmap	= drm_fb_helper_setcmap,
++	.fb_dmabuf_export = exynos_fb_get_dma_buf,
+ };
+ 
+ static int exynos_drm_fbdev_update(struct drm_fb_helper *helper,
+-- 
+1.9.1
+

@@ -1,0 +1,16 @@
+based on the patches in mali_chromebook-setup_006.tar.gz from: https://community.arm.com/graphics/b/blog/posts/linux-on-chromebook-with-arm-mali-gpu
+
+status:
+- seems to work ok
+- using the x11 blob apps hang on exit (kernel thread in mali driver seems to crash)
+- using the fbdev or x11 blob with LIBGL_FB=3 seems to work better (only app crash on exit, but otherwise ok)
+- modesetting xorg with LIBGL_FB=3 and fbdev works as well :)
+- exynos config and rk armsoc xorg used
+- qt programs give error - found something about it on odroid forum, some patched qt lib (not sure if still relevant)
+
+history:
+- looks like mali in the kernel is r22p0, but the binary blob is r12p0 ... hmmm ...
+  - tried chromeos mali 20, does not complain about wrong version but does not work, most probably no x11
+  - next try: backport the mali drinver in the kernel to r12p0 - works better, but not fully
+  - next try: go back to the latest one, but with the compatibility hack from the git log
+  - maybe test mainline mali with t604 r5p0 blob - most probably this will not work, but who knows ...

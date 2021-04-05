@@ -1,0 +1,28 @@
+From d8b53b26ac62f4ea1b832ac4ed1cc202b5abb4e7 Mon Sep 17 00:00:00 2001
+From: Guillaume Tucker <guillaume.tucker@arm.com>
+Date: Fri, 5 Dec 2014 17:17:12 +0000
+Subject: [PATCH 3/9] ARM: exynos: fix build with missing include
+
+This missing include was causing a warning treated as error
+with some cross-compiler toolchains.
+
+Signed-off-by: Guillaume Tucker <guillaume.tucker@arm.com>
+---
+ arch/arm/mach-exynos/common.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/arch/arm/mach-exynos/common.c b/arch/arm/mach-exynos/common.c
+index f4ec12e..d248452 100644
+--- a/arch/arm/mach-exynos/common.c
++++ b/arch/arm/mach-exynos/common.c
+@@ -35,6 +35,7 @@
+ #include <asm/mach/irq.h>
+ #include <asm/cacheflush.h>
+ 
++#include <mach/asv-exynos.h>
+ #include <mach/regs-irq.h>
+ #include <mach/regs-pmu.h>
+ #include <mach/regs-gpio.h>
+-- 
+1.9.1
+

@@ -1,0 +1,13 @@
+diff --git a/drivers/gpu/drm/exynos/exynos_drm_fbdev.c b/drivers/gpu/drm/exynos/exynos_drm_fbdev.c
+index 1964775850e0..f3d0596e1c7e 100644
+--- a/drivers/gpu/drm/exynos/exynos_drm_fbdev.c
++++ b/drivers/gpu/drm/exynos/exynos_drm_fbdev.c
+@@ -113,6 +113,8 @@ static int exynos_drm_fbdev_update(struct drm_fb_helper *helper,
+ 	fbi->screen_base = exynos_gem->kvaddr + offset;
+ 	fbi->screen_size = size;
+ 	fbi->fix.smem_len = size;
++        fbi->fix.smem_start = buffer->dma_addr;
++        fbi->fix.smem_len = size;
+ 
+ 	return 0;
+ }

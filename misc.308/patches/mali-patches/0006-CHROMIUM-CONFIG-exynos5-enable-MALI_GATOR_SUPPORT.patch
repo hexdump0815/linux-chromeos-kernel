@@ -1,0 +1,26 @@
+From 4bf48adfbec78ab1d0da05ca8f03e921aa4b6882 Mon Sep 17 00:00:00 2001
+From: Guillaume Tucker <guillaume.tucker@arm.com>
+Date: Thu, 28 Aug 2014 14:51:37 +0100
+Subject: [PATCH 6/9] CHROMIUM: CONFIG: exynos5: enable MALI_GATOR_SUPPORT
+
+Signed-off-by: Guillaume Tucker <guillaume.tucker@arm.com>
+---
+ chromeos/config/armel/chromeos-exynos5.flavour.config | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/chromeos/config/armel/chromeos-exynos5.flavour.config b/chromeos/config/armel/chromeos-exynos5.flavour.config
+index 888b22e..03b0dd7 100644
+--- a/chromeos/config/armel/chromeos-exynos5.flavour.config
++++ b/chromeos/config/armel/chromeos-exynos5.flavour.config
+@@ -169,7 +169,7 @@ CONFIG_MACH_EXYNOS5_DT=y
+ # CONFIG_MALI_DEBUG_SHADER_SPLIT_FS is not set
+ # CONFIG_MALI_DEVFREQ is not set
+ CONFIG_MALI_EXPERT=y
+-# CONFIG_MALI_GATOR_SUPPORT is not set
++CONFIG_MALI_GATOR_SUPPORT=y
+ CONFIG_MALI_MIDGARD=m
+ CONFIG_MALI_MIDGARD_DEBUG_SYS=y
+ CONFIG_MALI_MIDGARD_DVFS=y
+-- 
+1.9.1
+

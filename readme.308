@@ -11,21 +11,70 @@
 
 # INFO: based on the tree commit: 278fb8920fdf9a2c896287e3f5b721c65504e5c9
 #                    from branch: release-R89-13729.B-chromeos-3.8
+#
+# TODO: maybe enable NFS filesystem?
+#
+# disabled to make it compile (at about r62 and r64):
+# CONFIG_NET_IPVTI
+# CONFIG_IPV6_GRE
+# CONFIG_DVB_USB
 
 # patches:
-# none yet
+# some old patches from arch linux arm
+patch -p1 < /compile/doc/chromeos/misc.308/patches/alarm-PKGBUILDs/core/linux-peach/0001-mwifiex-do-not-create-AP-and-P2P-interfaces-upon-dri.patch
+# this is not required anymore as the firmware is at the proper place already now
+#patch -p1 < /compile/doc/chromeos/misc.308/patches/alarm-PKGBUILDs/core/linux-peach/0002-use-chromiumos-mwifiex-drivers.patch
+patch -p1 < /compile/doc/chromeos/misc.308/patches/alarm-PKGBUILDs/core/linux-peach/0003-exynos-DRM-have-exynos_drm_fbdev_update-set-smem_sta.patch
+# enable swap functionality
+patch -p0 < /compile/doc/chromeos/misc.308/patches/enable-swap.diff
+# fake the kernel version number so that docker will work - functionality for that seems to be there
+patch -p1 < /compile/doc/chromeos/misc.308/patches/docker-fake.patch.r72
+# some ext hdmi fix
+patch -p1 < /compile/doc/chromeos/misc.308/patches/hdmi-257px-fix-not-working.patch
+# make the modules compile
+patch -p1 < /compile/doc/chromeos/misc.308/patches/module-compile-fix.patch
+# misc fixes
+patch -p1 < /compile/doc/chromeos/misc.308/patches/r68-fixes.patch
+# fix perf compile
+patch -p1 < /compile/doc/chromeos/misc.308/patches/fix-perf-compile.patch
+# get mali working
+mv drivers/gpu/arm/midgard drivers/gpu/arm/midgard.org
+tar xzf /compile/doc/chromeos/misc.308/patches/mali-patches/cbe-mali-r12p0.tar.gz
+patch -p1 < /compile/doc/chromeos/misc.308/patches/mali-patches/0001-ARM-exynos-export-symbols-to-build-Mali-driver-as-a-.patch
+patch -p1 < /compile/doc/chromeos/misc.308/patches/mali-patches/0002-PM-OPP-Export-more-symbols-for-module-usage.patch
+patch -p1 < /compile/doc/chromeos/misc.308/patches/mali-patches/0003-ARM-exynos-fix-build-with-missing-include.patch
+# not really needed and breaks too easy ...
+#patch -p1 < /compile/doc/chromeos/misc.308/patches/mali-patches/0004-CHROMIUM-CONFIG-exynos5-build-MALI_MIDGARD-as-module.patch
+patch -p1 < /compile/doc/chromeos/misc.308/patches/mali-patches/0005-MALI-Chromebook-build-platform-as-loadable-module.patch
+# not really needed and breaks too easy ...
+#patch -p1 < /compile/doc/chromeos/misc.308/patches/mali-patches/0006-CHROMIUM-CONFIG-exynos5-enable-MALI_GATOR_SUPPORT.patch
+patch -p1 < /compile/doc/chromeos/misc.308/patches/mali-patches/0007-fbdev-add-dma-buf-support.patch
+patch -p1 < /compile/doc/chromeos/misc.308/patches/mali-patches/0008-drm-exynos-add-fb_dmabuf_export-implementation.patch
+patch -p1 < /compile/doc/chromeos/misc.308/patches/mali-patches/0009-ARM-DMA-Use-vm_pgoff-for-IOMMU-mmap.patch
+patch -p1 < /compile/doc/chromeos/misc.308/patches/mali-patches/export-devfreq-symbols.patch
+patch -p1 < /compile/doc/chromeos/misc.308/patches/mali-patches/fix-sched-rt-include.patch
+# fix for the sched/rt.h include - should go into the tar file from above
+cp /compile/doc/chromeos/misc.308/patches/mali-patches/mali_kbase_js_policy_cfs.c drivers/gpu/arm/midgard/mali_kbase_js_policy_cfs.c
 
 cp /compile/doc/chromeos/config.308 /compile/source/linux-chromeos-3.8/.config
 cd /compile/source/linux-chromeos-3.8
 
+cp include/linux/compiler-gcc5.h include/linux/compiler-gcc6.h
+cp include/linux/compiler-gcc5.h include/linux/compiler-gcc7.h
+cp include/linux/compiler-gcc5.h include/linux/compiler-gcc8.h
 export ARCH=arm
-make defconfig
+# seems to be no longer needed
+#export WIFIVERSION=-3.8
+make prepare
+#make defconfig
 /compile/doc/chromeos/misc.308/options/enable-docker-options.sh
 /compile/doc/chromeos/misc.308/options/enable-additional-options.sh
 #/compile/doc/chromeos/misc.308/options/remove-unused-options.sh
 make oldconfig
 make -j 4 zImage dtbs modules
 cd tools/perf
+# without this it would fail on warnings
+export WERROR=0
 make
 cd ../power/cpupower
 make
@@ -43,18 +92,23 @@ cp -v tools/power/cpupower/libcpupower.so.0.0.1 /lib/modules/${kver}/tools/libcp
 cp -v .config /boot/config-${kver}
 cp -v arch/arm/boot/zImage /boot/zImage-${kver}
 mkdir -p /boot/dtb-${kver}
-cp -v arch/arm/boot/dts/rockchip/exynos5250-snow*.dtb /boot/dtb-${kver}
-cp -v arch/arm/boot/dts/rockchip/exynos5420-peach-pit.dtb /boot/dtb-${kver}
-cp -v arch/arm/boot/dts/rockchip/exynos5800-peach-pi.dtb /boot/dtb-${kver}
+cp -v arch/arm/boot/dts/exynos5250-snow*.dtb /boot/dtb-${kver}
+cp -v arch/arm/boot/dts/exynos5250-spring.dtb /boot/dtb-${kver}
+cp -v arch/arm/boot/dts/exynos5420-peach-pit*.dtb /boot/dtb-${kver}
+cp -v arch/arm/boot/dts/exynos5422-peach-pi.dtb /boot/dtb-${kver}
+cp -v arch/arm/boot/dts/exynos5250-skate.dtb /boot/dtb-${kver}
 cp -v System.map /boot/System.map-${kver}
 # start chromebook special - required: apt-get install liblz4-tool vboot-kernel-utils
 cp arch/arm/boot/zImage zImage
 dd if=/dev/zero of=bootloader.bin bs=512 count=1
 cp /compile/doc/chromeos/misc.308/misc/cmdline cmdline
-mkimage -D "-I dts -O dtb -p 2048" -f auto -A arm -O linux -T kernel -C none -a 0 -d zImage -b arch/arm/boot/dts/exynos5250-snow.dtb -b arch/arm/boot/dts/exynos5250-snow-rev5.dtb -b arch/arm/boot/dts/exynos5420-peach-pit.dtb -b arch/arm/boot/dts/exynos5800-peach-pi.dtb kernel.itb
+cp /compile/doc/chromeos/misc.308/misc/kernel.its kernel.its
+# this one for some reason did not result in a bootable image
+#mkimage -D "-I dts -O dtb -p 2048" -f auto -A arm -O linux -T kernel -C none -a 0 -d zImage -b arch/arm/boot/dts/exynos5250-snow-rev4.dtb -b arch/arm/boot/dts/exynos5250-snow-rev5.dtb -b arch/arm/boot/dts/exynos5420-peach-pit.dtb -b arch/arm/boot/dts/exynos5420-peach-pit-rev3_5.dtb -b arch/arm/boot/dts/exynos5420-peach-pit-rev4.dtb -b arch/arm/boot/dts/exynos5422-peach-pi.dtb kernel.itb
+mkimage -D "-I dts -O dtb -p 2048" -f kernel.its kernel.itb
 vbutil_kernel --pack vmlinux.kpart --keyblock /usr/share/vboot/devkeys/kernel.keyblock --signprivate /usr/share/vboot/devkeys/kernel_data_key.vbprivk --version 1 --config cmdline --bootloader bootloader.bin --vmlinuz kernel.itb --arch arm
 cp -v vmlinux.kpart /boot/vmlinux.kpart-${kver}
-rm -f zImage cmdline bootloader.bin kernel.itb vmlinux.kpart
+rm -f zImage cmdline bootloader.bin kernel.its kernel.itb vmlinux.kpart
 # end chromebook special
 cd /boot
 update-initramfs -c -k ${kver}

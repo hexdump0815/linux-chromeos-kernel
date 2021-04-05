@@ -1,0 +1,26 @@
+diff --git a/drivers/gpu/drm/udl/udl_connector.c b/drivers/gpu/drm/udl/udl_connector.c
+index 75072166d4e7..0fe3732ed734 100644
+--- a/drivers/gpu/drm/udl/udl_connector.c
++++ b/drivers/gpu/drm/udl/udl_connector.c
+@@ -14,7 +14,7 @@
+ #include <drm/drm_crtc.h>
+ #include <drm/drm_edid.h>
+ #include <drm/drm_crtc_helper.h>
+-#include <udl_connector.h>
++#include "udl_connector.h"
+ #include "udl_drv.h"
+ 
+ static bool udl_get_edid_block(struct udl_device *udl, int block_idx,
+diff --git a/fs/configfs/dir.c b/fs/configfs/dir.c
+index 712b10f64c70..01f2fc16d2e1 100644
+--- a/fs/configfs/dir.c
++++ b/fs/configfs/dir.c
+@@ -387,7 +387,7 @@ static void remove_dir(struct dentry * d)
+ 	if (d->d_inode)
+ 		simple_rmdir(parent->d_inode,d);
+ 
+-	pr_debug(" o %s removing done (%d)\n",d->d_name.name, d->d_count);
++	/* pr_debug(" o %s removing done (%d)\n",d->d_name.name, d->d_count); */
+ 
+ 	dput(parent);
+ }
