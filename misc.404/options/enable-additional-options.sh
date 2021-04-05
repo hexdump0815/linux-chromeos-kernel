@@ -21,7 +21,7 @@ cd /compile/source/linux-chromeos-4.4
 ./scripts/config -d CONFIG_OCFS2_FS
 
 ./scripts/config -d CONFIG_LOCALVERSION_AUTO
-./scripts/config --set-str CONFIG_LOCALVERSION "-cos-404"
+./scripts/config --set-str CONFIG_LOCALVERSION "-404-r89"
 
 for i in `cat /compile/doc/chromeos/misc.404/options/additional-options-*-yes.txt | grep -v ^#`; do
   echo $i

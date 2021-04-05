@@ -21,7 +21,7 @@ cd /compile/source/linux-chromeos-4.19
 ./scripts/config -d CONFIG_OCFS2_FS
 
 ./scripts/config -d CONFIG_LOCALVERSION_AUTO
-./scripts/config --set-str CONFIG_LOCALVERSION "-cos-419"
+./scripts/config --set-str CONFIG_LOCALVERSION "-419-r89"
 
 for i in `cat /compile/doc/chromeos/misc.419/options/additional-options-*-yes.txt | grep -v ^#`; do
   echo $i
