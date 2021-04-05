@@ -1,8 +1,8 @@
 # directories:
 # - /compile/doc/chromeos - the files in this dir
 # - /compile/source/linux-chromeos-4.19 - the kernel sources checked out from gitrepo
-# - /compile/result/chromeosup - the resulting kernel, modules etc. tar.gz files
-# name: stb-419
+# - /compile/result/chromeos - the resulting kernel, modules etc. tar.gz files
+# name: cos-419
 
 # IMPORTANT: this is work in progress and not yet ready to use!
 # status: not yet known
