@@ -1,0 +1,29 @@
+from: https://lore.kernel.org/patchwork/patch/960281/
+
+diff --git a/tools/perf/arch/arm64/Makefile b/tools/perf/arch/arm64/Makefile
+index dbef716a1..f7a8c1564 100644
+--- a/tools/perf/arch/arm64/Makefile
++++ b/tools/perf/arch/arm64/Makefile
+@@ -12,7 +12,7 @@ PERF_HAVE_ARCH_REGS_QUERY_REGISTER_OFFSET := 1
+ out    := $(OUTPUT)arch/arm64/include/generated/asm
+ header := $(out)/syscalls.c
+ incpath := $(srctree)/tools
+-sysdef := $(srctree)/tools/arch/arm64/include/uapi/asm/unistd.h
++sysdef := $(srctree)/tools/include/uapi/asm-generic/unistd.h
+ sysprf := $(srctree)/tools/perf/arch/arm64/entry/syscalls/
+ systbl := $(sysprf)/mksyscalltbl
+ 
+diff --git a/tools/perf/arch/arm64/entry/syscalls/mksyscalltbl b/tools/perf/arch/arm64/entry/syscalls/mksyscalltbl
+index c21023509960..52e197317d3e 100755
+--- a/tools/perf/arch/arm64/entry/syscalls/mksyscalltbl
++++ b/tools/perf/arch/arm64/entry/syscalls/mksyscalltbl
+@@ -28,6 +28,7 @@ create_table_from_c()
+ 
+ 	cat <<-_EoHEADER
+ 		#include <stdio.h>
++		#define __ARCH_WANT_RENAMEAT
+ 		#include "$input"
+ 		int main(int argc, char *argv[])
+ 		{
+
+
