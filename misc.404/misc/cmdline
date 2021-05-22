@@ -1,1 +1,1 @@
-console=tty1 root=/dev/sda2 rootfstype=ext4 rootwait ro fsck.fix=yes fsck.repair=yes net.ifnames=0 ipv6.disable=1
+console=ttyS0,115200 console=tty1 earlycon loglevel=8 init=/sbin/init root=PARTUUID=%U/PARTNROFF=3 rootwait ro fsck.fix=yes fsck.repair=yes net.ifnames=0 ipv6.disable=1 noresume
