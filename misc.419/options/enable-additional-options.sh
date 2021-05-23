@@ -26,12 +26,22 @@ cd /compile/source/linux-chromeos-4.19
 ./scripts/config -d CONFIG_LOCALVERSION_AUTO
 ./scripts/config --set-str CONFIG_LOCALVERSION "-cos-r90"
 
-for i in `cat /compile/doc/chromeos/misc.419/options/additional-options-*-yes.txt | grep -v ^#`; do
+for i in `cat /compile/doc/chromeos/misc.419/options/additional-options-generic-yes.txt | grep -v ^#`; do
   echo $i
   ./scripts/config -e $i
 done
 
-for i in `cat /compile/doc/chromeos/misc.419/options/additional-options-*-mod.txt | grep -v ^#`; do
+for i in `cat /compile/doc/chromeos/misc.419/options/additional-options-generic-mod.txt | grep -v ^#`; do
+  echo $i
+  ./scripts/config -m $i
+done
+
+for i in `cat /compile/doc/chromeos/misc.419/options/additional-options-special-yes.txt | grep -v ^#`; do
+  echo $i
+  ./scripts/config -e $i
+done
+
+for i in `cat /compile/doc/chromeos/misc.419/options/additional-options-special-mod.txt | grep -v ^#`; do
   echo $i
   ./scripts/config -m $i
 done
