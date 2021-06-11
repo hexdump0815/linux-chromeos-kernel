@@ -8,6 +8,8 @@ branch: release-R89-13729.B-chromeos-4.4
 git clone --depth 1 https://chromium.googlesource.com/chromiumos/third_party/kernel/ -b release-R89-13729.B-chromeos-4.4
 branch: release-R90-13816.B-chromeos-4.4
 git clone --depth 1 https://chromium.googlesource.com/chromiumos/third_party/kernel/ -b release-R90-13816.B-chromeos-4.4
+branch: release-R91-13904.B-chromeos-4.4
+git clone --depth 1 https://chromium.googlesource.com/chromiumos/third_party/kernel/ -b release-R91-13904.B-chromeos-4.4
 
 v4.19 tree:
 origin	https://chromium.googlesource.com/chromiumos/third_party/kernel/ (fetch)
@@ -16,11 +18,15 @@ branch: release-R89-13729.B-chromeos-4.19
 git clone --depth 1 https://chromium.googlesource.com/chromiumos/third_party/kernel/ -b release-R89-13729.B-chromeos-4.19
 branch: release-R90-13816.B-chromeos-4.19
 git clone --depth 1 https://chromium.googlesource.com/chromiumos/third_party/kernel/ -b release-R90-13816.B-chromeos-4.19
+branch: release-R91-13904.B-chromeos-4.19
+git clone --depth 1 https://chromium.googlesource.com/chromiumos/third_party/kernel/ -b release-R91-13904.B-chromeos-4.19
 
 v3.8 tree:
 origin	https://chromium.googlesource.com/chromiumos/third_party/kernel/ (fetch)
 origin	https://chromium.googlesource.com/chromiumos/third_party/kernel/ (push)
 branch: release-R89-13729.B-chromeos-3.8
 git clone --depth 1 https://chromium.googlesource.com/chromiumos/third_party/kernel/ -b release-R89-13729.B-chromeos-3.8
-brnach: release-R90-13816.B-chromeos-3.8
+branch: release-R90-13816.B-chromeos-3.8
 git clone --depth 1 https://chromium.googlesource.com/chromiumos/third_party/kernel/ -b release-R90-13816.B-chromeos-3.8
+branch: release-R91-13904.B-chromeos-3.8
+git clone --depth 1 https://chromium.googlesource.com/chromiumos/third_party/kernel/ -b release-R91-13904.B-chromeos-3.8

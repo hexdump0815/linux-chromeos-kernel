@@ -24,7 +24,7 @@ cd /compile/source/linux-chromeos-3.8
 ./scripts/config -d CONFIG_DRM_VGEM
 
 ./scripts/config -d CONFIG_LOCALVERSION_AUTO
-./scripts/config --set-str CONFIG_LOCALVERSION "-cos-r90"
+./scripts/config --set-str CONFIG_LOCALVERSION "-cos-r91"
 
 for i in `cat /compile/doc/chromeos/misc.308/options/additional-options-*-yes.txt | grep -v ^#`; do
   echo $i
