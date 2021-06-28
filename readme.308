@@ -68,18 +68,16 @@ cp include/linux/compiler-gcc5.h include/linux/compiler-gcc9.h
 export ARCH=arm
 # seems to be no longer needed
 #export WIFIVERSION=-3.8
-make prepare
-#make defconfig
 /compile/doc/chromeos/misc.308/options/enable-docker-options.sh
 /compile/doc/chromeos/misc.308/options/enable-additional-options.sh
 #/compile/doc/chromeos/misc.308/options/remove-unused-options.sh
-make oldconfig
+make olddefconfig
 # for compiling with a certain gcc version use - a newer gcc might result in errors
 # gcc-5 for ubuntu 18.04 - apt-get install gcc-5
 #make HOSTCC=gcc-5 CC=gcc-5 -j 4 zImage dtbs modules
 # gcc-7 for ubuntu 20.04 - apt-get install gcc-7
-#make HOSTCC=gcc-7 CC=gcc-7 -j 4 zImage dtbs modules
-make -j 4 zImage dtbs modules
+make HOSTCC=gcc-7 CC=gcc-7 -j 4 zImage dtbs modules
+#make -j 4 zImage dtbs modules
 cd tools/perf
 # without this it would fail on warnings
 export WERROR=0

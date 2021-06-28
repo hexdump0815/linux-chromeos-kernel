@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cd /compile/source/linux-chromeos-4.4
+cd /compile/source/linux-chromeos-3.8
 
 for i in `cat /compile/doc/chromeos/misc.404/options/options-to-remove-generic.txt | grep -v ^#`; do
   echo $i
