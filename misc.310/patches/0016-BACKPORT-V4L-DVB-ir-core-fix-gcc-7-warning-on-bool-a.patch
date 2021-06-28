@@ -1,0 +1,40 @@
+From 332c9d362c4f089cfb6c60607a2a49fdd5193108 Mon Sep 17 00:00:00 2001
+From: Arnd Bergmann <arnd@arndb.de>
+Date: Thu, 11 May 2017 13:46:44 +0200
+Subject: [PATCH 16/33] BACKPORT: V4L/DVB: ir-core: fix gcc-7 warning on bool
+ arithmetic
+
+gcc-7 suggests that an expression using a bitwise not and a bitmask
+on a 'bool' variable is better written using boolean logic:
+
+drivers/media/rc/imon.c: In function 'imon_incoming_scancode':
+drivers/media/rc/imon.c:1725:22: error: '~' on a boolean expression [-Werror=bool-operation]
+    ictx->pad_mouse = ~(ictx->pad_mouse) & 0x1;
+                      ^
+drivers/media/rc/imon.c:1725:22: note: did you mean to use logical not?
+
+I agree.
+
+Fixes: 21677cfc562a ("V4L/DVB: ir-core: add imon driver")
+Signed-off-by: Arnd Bergmann <arnd@arndb.de>
+(am from https://patchwork.kernel.org/patch/9721249/)
+---
+ drivers/media/rc/imon.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/media/rc/imon.c b/drivers/media/rc/imon.c
+index 72e3fa652481..257bb7a6ff54 100644
+--- a/drivers/media/rc/imon.c
++++ b/drivers/media/rc/imon.c
+@@ -1530,7 +1530,7 @@ static void imon_incoming_packet(struct imon_context *ictx,
+ 	if (kc == KEY_KEYBOARD && !ictx->release_code) {
+ 		ictx->last_keycode = kc;
+ 		if (!nomouse) {
+-			ictx->pad_mouse = ~(ictx->pad_mouse) & 0x1;
++			ictx->pad_mouse = !ictx->pad_mouse;
+ 			dev_dbg(dev, "toggling to %s mode\n",
+ 				ictx->pad_mouse ? "mouse" : "keyboard");
+ 			spin_unlock_irqrestore(&ictx->kc_lock, flags);
+-- 
+2.22.0
+

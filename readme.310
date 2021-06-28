@@ -1,0 +1,93 @@
+# directories:
+# - /compile/doc/chromeos - the files in this dir
+# - /compile/source/linux-chromeos-3.10 - the kernel sources checked out from gitrepo
+# - /compile/result/chromeos - the resulting kernel, modules etc. tar.gz files
+# - /compile/doc/kernel-config-options - https://github.com/hexdump0815/kernel-config-options
+# name: cos-r91
+
+# IMPORTANT: this is work in progress and not yet ready to use!
+# status: not yet known
+
+# INFO: based on the tree commit: 8cf05d5bb96ff832f9d258726a3a49f8bc6075e2
+#                    from branch: release-R91-13904.B-chromeos-3.10
+#
+# disabled to make it compile (at r91):
+# CONFIG_DVB_USB
+
+# patches:
+# some old patches from arch linux arm
+for i in /compile/doc/chromeos/misc.310/patches/0*.patch; do
+  echo === $i
+  patch -p1 < $i
+done
+# add swap support
+patch -p0 < /compile/doc/chromeos/misc.310/patches/enable-swap.diff
+# fix module compilation
+patch -p1 < /compile/doc/chromeos/misc.310/patches/module-compile-fix.patch
+
+# usb 3.0 controller firmware
+cp -v /compile/doc/chromeos/misc.310/misc/xusb.bin firmware/nvidia/tegra124/xusb.bin
+
+# build the resume firmware
+make -C /compile/doc/chromeos/misc.310/misc/coreboot/src/soc/nvidia/tegra124/lp0
+# install firmware
+install -D -m644 /compile/doc/chromeos/misc.310/misc/coreboot/src/soc/nvidia/tegra124/lp0/tegra_lp0_resume.fw /lib/firmware/tegra12x/tegra_lp0_resume.fw
+install -D -m644 /compile/doc/chromeos/misc.310/misc/sd8787_uapsta_cros.bin /lib/firmware/mrvl
+install -D -m644 /compile/doc/chromeos/misc.310/misc/sd8797_uapsta_cros.bin /lib/firmware/mrvl
+install -D -m644 /compile/doc/chromeos/misc.310/misc/sd8897_uapsta_cros.bin /lib/firmware/mrvl
+
+cp /compile/doc/chromeos/config.310 /compile/source/linux-chromeos-3.10/.config
+cd /compile/source/linux-chromeos-3.10
+
+export ARCH=arm
+# this one is required here
+export WIFIVERSION=-3.8
+/compile/doc/chromeos/misc.310/options/enable-docker-options.sh
+/compile/doc/chromeos/misc.310/options/enable-additional-options.sh
+#/compile/doc/chromeos/misc.310/options/remove-unused-options.sh
+make olddefconfig
+# for compiling with a certain gcc version use - a newer gcc might result in errors
+# gcc-5 for ubuntu 18.04 - apt-get install gcc-5
+#make HOSTCC=gcc-5 CC=gcc-5 -j 4 zImage dtbs modules
+# gcc-7 for ubuntu 20.04 - apt-get install gcc-7
+make HOSTCC=gcc-7 CC=gcc-7 -j 4 zImage dtbs modules
+#make -j 4 zImage dtbs modules
+cd tools/perf
+# without this it would fail on warnings
+export WERROR=0
+make
+cd ../power/cpupower
+make
+cd ../../..
+export kver=`make kernelrelease`
+echo ${kver}
+# remove debug info if there and not wanted
+#find . -type f -name '*.ko' | sudo xargs -n 1 objcopy --strip-unneeded
+make modules_install
+mkdir -p /lib/modules/${kver}/tools
+cp -v tools/perf/perf /lib/modules/${kver}/tools
+cp -v tools/power/cpupower/cpupower /lib/modules/${kver}/tools
+cp -v tools/power/cpupower/libcpupower.so.0.0.0 /lib/modules/${kver}/tools/libcpupower.so.0
+# make headers_install INSTALL_HDR_PATH=/usr
+cp -v .config /boot/config-${kver}
+cp -v arch/arm/boot/zImage /boot/zImage-${kver}
+mkdir -p /boot/dtb-${kver}
+cp -v arch/arm/boot/dts/tegra124-nyan-*.dtb /boot/dtb-${kver}
+cp -v System.map /boot/System.map-${kver}
+# start chromebook special - required: apt-get install liblz4-tool vboot-kernel-utils
+cp arch/arm/boot/zImage zImage
+dd if=/dev/zero of=bootloader.bin bs=512 count=1
+cp /compile/doc/chromeos/misc.310/misc/cmdline cmdline
+mkimage -D "-I dts -O dtb -p 2048" -f auto -A arm -O linux -T kernel -C none -a 0 -d zImage -b arch/arm/boot/dts/tegra124-nyan-big-rev0_2.dtb -b arch/arm/boot/dts/tegra124-nyan-big-rev3_7.dtb -b arch/arm/boot/dts/tegra124-nyan-big-rev8_9.dtb -b arch/arm/boot/dts/tegra124-nyan-blaze.dtb -b arch/arm/boot/dts/tegra124-nyan-kitty-rev0_3.dtb -b arch/arm/boot/dts/tegra124-nyan-kitty-rev8.dtb -b arch/arm/boot/dts/tegra124-nyan-rev0.dtb -b arch/arm/boot/dts/tegra124-nyan-rev1.dtb kernel.itb
+vbutil_kernel --pack vmlinux.kpart --keyblock /usr/share/vboot/devkeys/kernel.keyblock --signprivate /usr/share/vboot/devkeys/kernel_data_key.vbprivk --version 1 --config cmdline --bootloader bootloader.bin --vmlinuz kernel.itb --arch arm
+cp -v vmlinux.kpart /boot/vmlinux.kpart-${kver}
+rm -f zImage cmdline bootloader.bin kernel.itb vmlinux.kpart
+# end chromebook special
+cd /boot
+update-initramfs -c -k ${kver}
+#mkimage -A arm -O linux -T ramdisk -a 0x0 -e 0x0 -n initrd.img-${kver} -d initrd.img-${kver} uInitrd-${kver}
+tar cvzf /compile/source/linux-chromeos-3.10/${kver}.tar.gz /boot/*-${kver} /lib/modules/${kver}
+cp -v /compile/doc/chromeos/config.310 /compile/doc/chromeos/config.310.old
+cp -v /compile/source/linux-chromeos-3.10/.config /compile/doc/chromeos/config.310
+cp -v /compile/source/linux-chromeos-3.10/.config /compile/doc/chromeos/config.310-${kver}
+cp -v /compile/source/linux-chromeos-3.10/*.tar.gz /compile/result/chromeos

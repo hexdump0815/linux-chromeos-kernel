@@ -1,0 +1,28 @@
+From f9b64b862168e28ff0c8a729dc4847bc08ef1370 Mon Sep 17 00:00:00 2001
+From: Ronny Lorenz <ronny@tbi.univie.ac.at>
+Date: Thu, 25 Jan 2018 21:54:04 +0100
+Subject: [PATCH 29/33] UPSTREAM: fs/configs use "d_lockref.count" instead
+ instead of "d_count"
+
+- This change was missing in 2d1b67b7ef61e7831727415ce0aa5fb081e1c888
+  "vfs: make the dentry cache use the lockref infrastructure"
+---
+ fs/configfs/dir.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/fs/configfs/dir.c b/fs/configfs/dir.c
+index 7aabc6ad4e9b..1bb7675620fa 100644
+--- a/fs/configfs/dir.c
++++ b/fs/configfs/dir.c
+@@ -387,7 +387,7 @@ static void remove_dir(struct dentry * d)
+ 	if (d->d_inode)
+ 		simple_rmdir(parent->d_inode,d);
+ 
+-	pr_debug(" o %s removing done (%d)\n",d->d_name.name, d->d_count);
++	pr_debug(" o %s removing done (%d)\n",d->d_name.name, d->d_lockref.count);
+ 
+ 	dput(parent);
+ }
+-- 
+2.22.0
+

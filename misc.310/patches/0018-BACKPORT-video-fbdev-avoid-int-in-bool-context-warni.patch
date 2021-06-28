@@ -1,0 +1,41 @@
+From 07036712ac2a5e3ba6e94c9bc659f28a4b734a3d Mon Sep 17 00:00:00 2001
+From: Arnd Bergmann <arnd@arndb.de>
+Date: Wed, 14 Jun 2017 12:40:36 +0200
+Subject: [PATCH 18/33] BACKPORT: video: fbdev: avoid int-in-bool-context
+ warning
+
+Almost clean cherry-pick of c544ad18bd47ee989eb433f09b6574a7f6d415c7
+
+gcc-7 suspects this code might be wrong because we use the
+result of a multiplication as a bool:
+
+drivers/video/fbdev/core/fbmon.c: In function 'fb_edid_add_monspecs':
+drivers/video/fbdev/core/fbmon.c:1051:84: error: '*' in boolean context, suggest '&&' instead [-Werror=int-in-bool-context]
+
+It's actually fine, so let's add a comparison to zero to make
+that clear to the compiler too.
+
+Signed-off-by: Arnd Bergmann <arnd@arndb.de>
+Cc: Andrew Morton <akpm@linux-foundation.org>
+Signed-off-by: Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>
+(cherry picked from commit c544ad18bd47ee989eb433f09b6574a7f6d415c7)
+---
+ drivers/video/fbmon.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/video/fbmon.c b/drivers/video/fbmon.c
+index 67f6dc347df5..d05c0d581ac5 100644
+--- a/drivers/video/fbmon.c
++++ b/drivers/video/fbmon.c
+@@ -1129,7 +1129,7 @@ void fb_edid_add_monspecs(unsigned char *edid, struct fb_monspecs *specs)
+ 
+ 	for (i = 0; i < (128 - edid[2]) / DETAILED_TIMING_DESCRIPTION_SIZE;
+ 	     i++, block += DETAILED_TIMING_DESCRIPTION_SIZE)
+-		if (PIXEL_CLOCK)
++		if (PIXEL_CLOCK != 0)
+ 			edt[num++] = block - edid;
+ 
+ 	/* Yikes, EDID data is totally useless */
+-- 
+2.22.0
+

@@ -1,0 +1,73 @@
+From 9c81d0d4909bae3a689f51c1b3e677a46be11aa6 Mon Sep 17 00:00:00 2001
+From: Kinglong Mee <kinglongmee@gmail.com>
+Date: Sat, 13 Jun 2015 10:07:00 +0800
+Subject: [PATCH 17/33] BACKPORT: nfs: Fix showing truncated fsid/dev in,
+ /proc/net/nfsfs/volumes
+
+Almost clean cherry-pick of df05a49f7204d81ba0e29fda3d56ccb730f05d87
+
+A truncated fsid showing from /proc/fs/nfsfs/volumes as,
+NV SERVER   PORT DEV     FSID              FSC
+v4 c0a80881  801 0:43    34931f044c2a439b  no
+
+It should be as,
+NV SERVER   PORT DEV          FSID                              FSC
+v4 c0a80881  801 0:43         34931f044c2a439b:954c5d830fa4be8c no
+
+The max buffer length for storing "%llx:%llx" format should be
+ 16 + 1 + 16 + 1 = 34 (16 for %llx, 1 for ':', 1 for '\0').
+
+Also, for storing "%u:%u" of MAJOR() and MINOR() should be
+ 8 + 1 + 3 + 1 = 13 (8 for 2^24, 1 for ':', 3 for 2^8, 1 for '\0').
+
+v2, add comments for dev/fsid buffer and use sizeof in snprintf.
+
+Signed-off-by: Kinglong Mee <kinglongmee@gmail.com>
+Signed-off-by: Trond Myklebust <trond.myklebust@primarydata.com>
+(cherry picked from commit df05a49f7204d81ba0e29fda3d56ccb730f05d87)
+---
+ fs/nfs/client.c | 12 +++++++-----
+ 1 file changed, 7 insertions(+), 5 deletions(-)
+
+diff --git a/fs/nfs/client.c b/fs/nfs/client.c
+index c513b0cc835f..abd137d61390 100644
+--- a/fs/nfs/client.c
++++ b/fs/nfs/client.c
+@@ -1373,27 +1373,29 @@ static int nfs_volume_list_show(struct seq_file *m, void *v)
+ {
+ 	struct nfs_server *server;
+ 	struct nfs_client *clp;
+-	char dev[8], fsid[17];
++	char dev[13];	// 8 for 2^24, 1 for ':', 3 for 2^8, 1 for '\0'
++	char fsid[34];	// 2 * 16 for %llx, 1 for ':', 1 for '\0'
+ 	struct nfs_net *nn = net_generic(m->private, nfs_net_id);
+ 
+ 	/* display header on line 1 */
+ 	if (v == &nn->nfs_volume_list) {
+-		seq_puts(m, "NV SERVER   PORT DEV     FSID              FSC\n");
++		seq_puts(m, "NV SERVER   PORT DEV          FSID"
++			    "                              FSC\n");
+ 		return 0;
+ 	}
+ 	/* display one transport per line on subsequent lines */
+ 	server = list_entry(v, struct nfs_server, master_link);
+ 	clp = server->nfs_client;
+ 
+-	snprintf(dev, 8, "%u:%u",
++	snprintf(dev, sizeof(dev), "%u:%u",
+ 		 MAJOR(server->s_dev), MINOR(server->s_dev));
+ 
+-	snprintf(fsid, 17, "%llx:%llx",
++	snprintf(fsid, sizeof(fsid), "%llx:%llx",
+ 		 (unsigned long long) server->fsid.major,
+ 		 (unsigned long long) server->fsid.minor);
+ 
+ 	rcu_read_lock();
+-	seq_printf(m, "v%u %s %s %-7s %-17s %s\n",
++	seq_printf(m, "v%u %s %s %-12s %-33s %s\n",
+ 		   clp->rpc_ops->version,
+ 		   rpc_peeraddr2str(clp->cl_rpcclient, RPC_DISPLAY_HEX_ADDR),
+ 		   rpc_peeraddr2str(clp->cl_rpcclient, RPC_DISPLAY_HEX_PORT),
+-- 
+2.22.0
+

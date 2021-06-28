@@ -1,0 +1,42 @@
+From c02750a216b39ee66d535fa3de127dde9dd07f70 Mon Sep 17 00:00:00 2001
+From: Ronny Lorenz <ronny@tbi.univie.ac.at>
+Date: Sun, 3 Sep 2017 17:39:42 +0200
+Subject: [PATCH 28/33] BACKPORT: net: inet: API fix for net/ipv4/ip_vti.c
+
+- With 48482b427b999c95e932e7f9da792903547daef8 the API in net/flow.h
+  slightly changed by adding a UID parameter to flowi4_init_output().
+  While most places were changed accordingly, two calls to
+  flowi4_init_output() in net/ipv4/ip_vti.c were still using the
+  previous API without UID. We fix this issue similar to the changes
+  introduced in net/ipv6/ip6_tunnel.c
+---
+ net/ipv4/ip_vti.c | 6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
+
+diff --git a/net/ipv4/ip_vti.c b/net/ipv4/ip_vti.c
+index 065604127418..680054809323 100644
+--- a/net/ipv4/ip_vti.c
++++ b/net/ipv4/ip_vti.c
+@@ -338,7 +338,8 @@ static netdev_tx_t vti_tunnel_xmit(struct sk_buff *skb, struct net_device *dev)
+ 			   be32_to_cpu(tunnel->parms.o_key), RT_TOS(tos),
+ 			   RT_SCOPE_UNIVERSE,
+ 			   IPPROTO_IPIP, 0,
+-			   dst, tiph->saddr, 0, 0);
++			   dst, tiph->saddr, 0, 0,
++			   sock_net_uid(dev_net(dev), NULL));
+ 	rt = ip_route_output_key(dev_net(dev), &fl4);
+ 	if (IS_ERR(rt)) {
+ 		dev->stats.tx_carrier_errors++;
+@@ -404,7 +405,8 @@ static int vti_tunnel_bind_dev(struct net_device *dev)
+ 				   be32_to_cpu(tunnel->parms.i_key),
+ 				   RT_TOS(iph->tos), RT_SCOPE_UNIVERSE,
+ 				   IPPROTO_IPIP, 0,
+-				   iph->daddr, iph->saddr, 0, 0);
++				   iph->daddr, iph->saddr, 0, 0,
++				   sock_net_uid(dev_net(dev), NULL));
+ 		rt = ip_route_output_key(dev_net(dev), &fl4);
+ 		if (!IS_ERR(rt)) {
+ 			tdev = rt->dst.dev;
+-- 
+2.22.0
+

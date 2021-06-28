@@ -1,0 +1,25 @@
+From a6872d6c26ac1f73a9ce7b1b2273f9241d6d37eb Mon Sep 17 00:00:00 2001
+From: Ronny Lorenz <ronny@tbi.univie.ac.at>
+Date: Sun, 20 Aug 2017 00:44:35 +0200
+Subject: [PATCH 19/33] isl29018: remove duplicate const
+
+---
+ drivers/staging/iio/light/isl29018.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/staging/iio/light/isl29018.c b/drivers/staging/iio/light/isl29018.c
+index aff325ae37da..d5a141e5cd0c 100644
+--- a/drivers/staging/iio/light/isl29018.c
++++ b/drivers/staging/iio/light/isl29018.c
+@@ -77,7 +77,7 @@
+ #define CONT_MODE_IR			2
+ #define CONT_MODE_PROX			3
+ 
+-static const char const *isl29018_cont_modes[] = {
++static const char *isl29018_cont_modes[] = {
+ 	"once",
+ 	"als",
+ 	"ir",
+-- 
+2.22.0
+

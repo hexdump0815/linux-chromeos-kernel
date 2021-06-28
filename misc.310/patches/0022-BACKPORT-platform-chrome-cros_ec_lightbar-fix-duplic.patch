@@ -1,0 +1,38 @@
+From f1f644776cbee9ec4dfbb1b5c32f1e9b5a9d6ec0 Mon Sep 17 00:00:00 2001
+From: Olof Johansson <olofj@chromium.org>
+Date: Tue, 3 Mar 2015 13:22:33 +0100
+Subject: [PATCH 22/33] BACKPORT: platform/chrome: cros_ec_lightbar - fix
+ duplicate const warning
+
+Almost clean cherry-pick of 377415abab7b49c982475990cd06eef9f33e2ccc
+
+Fix the following sparse warning:
+
+    drivers/platform/chrome/cros_ec_lightbar.c:254:25: sparse: duplicate const
+
+Reported-by: Dan Carpenter <dan.carpenter@oracle.com>
+Signed-off-by: Olof Johansson <olofj@chromium.org>
+Reviewed-by: Gwendal Grignou <gwendal@chromium.org>
+Signed-off-by: Javier Martinez Canillas <javier.martinez@collabora.co.uk>
+Signed-off-by: Olof Johansson <olof@lixom.net>
+(cherry picked from commit 377415abab7b49c982475990cd06eef9f33e2ccc)
+---
+ drivers/mfd/cros_ec_lightbar.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/mfd/cros_ec_lightbar.c b/drivers/mfd/cros_ec_lightbar.c
+index 78083a54c3cd..01357c88d8e8 100644
+--- a/drivers/mfd/cros_ec_lightbar.c
++++ b/drivers/mfd/cros_ec_lightbar.c
+@@ -244,7 +244,7 @@ static ssize_t store_rgb(struct device *dev, struct device_attribute *attr,
+ 	return (ok && i == 0) ? count : -EINVAL;
+ }
+ 
+-static const char const *seqname[] = {
++static const char *seqname[] = {
+ 	"ERROR", "S5", "S3", "S0", "S5S3", "S3S0",
+ 	"S0S3", "S3S5", "STOP", "RUN", "PULSE", "TEST", "KONAMI",
+ };
+-- 
+2.22.0
+

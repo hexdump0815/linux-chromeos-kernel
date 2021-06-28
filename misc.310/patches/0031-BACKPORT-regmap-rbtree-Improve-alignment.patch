@@ -1,0 +1,37 @@
+From 3bbe81368e97f7b76e7d7bee24cb0133a1fbca79 Mon Sep 17 00:00:00 2001
+From: Ronny Lorenz <ronny@tbi.univie.ac.at>
+Date: Sun, 24 Jun 2018 21:34:56 +0200
+Subject: [PATCH 31/33] BACKPORT:  regmap: rbtree: Improve alignment
+
+---
+ drivers/base/regmap/regcache-rbtree.c | 10 ++++++----
+ 1 file changed, 6 insertions(+), 4 deletions(-)
+
+diff --git a/drivers/base/regmap/regcache-rbtree.c b/drivers/base/regmap/regcache-rbtree.c
+index 3394d9e41330..1aa95105bc74 100644
+--- a/drivers/base/regmap/regcache-rbtree.c
++++ b/drivers/base/regmap/regcache-rbtree.c
+@@ -23,14 +23,16 @@ static int regcache_rbtree_write(struct regmap *map, unsigned int reg,
+ static int regcache_rbtree_exit(struct regmap *map);
+ 
+ struct regcache_rbtree_node {
+-	/* the actual rbtree node holding this block */
+-	struct rb_node node;
+-	/* base register handled by this block */
+-	unsigned int base_reg;
+ 	/* block of adjacent registers */
+ 	void *block;
++	/* Which registers are present */
++	long *cache_present;
++	/* base register handled by this block */
++	unsigned int base_reg;
+ 	/* number of registers available in the block */
+ 	unsigned int blklen;
++	/* the actual rbtree node holding this block */
++	struct rb_node node;
+ } __attribute__ ((packed));
+ 
+ struct regcache_rbtree_ctx {
+-- 
+2.22.0
+

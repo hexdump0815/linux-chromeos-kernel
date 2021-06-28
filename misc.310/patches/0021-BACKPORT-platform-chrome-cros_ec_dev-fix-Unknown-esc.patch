@@ -1,0 +1,38 @@
+From 1ee77d5e26ccec509aedff8b5d591d801062d21e Mon Sep 17 00:00:00 2001
+From: Olof Johansson <olofj@chromium.org>
+Date: Tue, 3 Mar 2015 13:22:32 +0100
+Subject: [PATCH 21/33] BACKPORT: platform/chrome: cros_ec_dev - fix Unknown
+ escape '%' warning
+
+Almost clean cherry-pick of ef59c25d1be9539890c03c4915cdd4b868191b6f
+
+Fix the following sparse warning:
+
+    drivers/platform/chrome/cros_ec_dev.c:64:45: sparse: Unknown escape '%'
+
+Reported-by: Dan Carpenter <dan.carpenter@oracle.com>
+Signed-off-by: Olof Johansson <olofj@chromium.org>
+Reviewed-by: Gwendal Grignou <gwendal@chromium.org>
+Signed-off-by: Javier Martinez Canillas <javier.martinez@collabora.co.uk>
+Signed-off-by: Olof Johansson <olof@lixom.net>
+(cherry picked from commit ef59c25d1be9539890c03c4915cdd4b868191b6f)
+---
+ drivers/mfd/cros_ec_dev.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/mfd/cros_ec_dev.c b/drivers/mfd/cros_ec_dev.c
+index 26ea7bbfc9f5..a52922cc2220 100644
+--- a/drivers/mfd/cros_ec_dev.c
++++ b/drivers/mfd/cros_ec_dev.c
+@@ -67,7 +67,7 @@ static int ec_get_version(struct cros_ec_device *ec, char *str, int maxlen)
+ 	}
+ 	if (resp.current_image >= ARRAY_SIZE(current_image_name))
+ 		resp.current_image = 3; /* invalid */
+-	snprintf(str, maxlen, "%s\n%s\n%s\n\%s\n", CROS_EC_DEV_VERSION,
++	snprintf(str, maxlen, "%s\n%s\n%s\n%s\n", CROS_EC_DEV_VERSION,
+ 		 resp.version_string_ro, resp.version_string_rw,
+ 		 current_image_name[resp.current_image]);
+ 
+-- 
+2.22.0
+

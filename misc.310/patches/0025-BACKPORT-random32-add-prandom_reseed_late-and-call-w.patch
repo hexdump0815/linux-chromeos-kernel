@@ -1,0 +1,109 @@
+From 5e06a354db405c71f054c0e59d9f53e3cf0b1b4d Mon Sep 17 00:00:00 2001
+From: Hannes Frederic Sowa <hannes@stressinduktion.org>
+Date: Mon, 11 Nov 2013 12:20:34 +0100
+Subject: [PATCH 25/33] BACKPORT: random32: add prandom_reseed_late() and call
+ when nonblocking pool becomes initialized
+
+Clean cherry-pick of 4af712e8df998475736f3e2727701bd31e3751a9
+
+The Tausworthe PRNG is initialized at late_initcall time. At that time the
+entropy pool serving get_random_bytes is not filled sufficiently. This
+patch adds an additional reseeding step as soon as the nonblocking pool
+gets marked as initialized.
+
+On some machines it might be possible that late_initcall gets called after
+the pool has been initialized. In this situation we won't reseed again.
+
+(A call to prandom_seed_late blocks later invocations of early reseed
+attempts.)
+
+Joint work with Daniel Borkmann.
+
+Cc: Eric Dumazet <eric.dumazet@gmail.com>
+Cc: Theodore Ts'o <tytso@mit.edu>
+Signed-off-by: Hannes Frederic Sowa <hannes@stressinduktion.org>
+Signed-off-by: Daniel Borkmann <dborkman@redhat.com>
+Acked-by: "Theodore Ts'o" <tytso@mit.edu>
+Signed-off-by: David S. Miller <davem@davemloft.net>
+(cherry picked from commit 4af712e8df998475736f3e2727701bd31e3751a9)
+---
+ drivers/char/random.c  |  5 ++++-
+ include/linux/random.h |  1 +
+ lib/random32.c         | 23 ++++++++++++++++++++++-
+ 3 files changed, 27 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/char/random.c b/drivers/char/random.c
+index 81eefa1c0d3f..a1c4cead519d 100644
+--- a/drivers/char/random.c
++++ b/drivers/char/random.c
+@@ -606,8 +606,11 @@ retry:
+ 
+ 	if (!r->initialized && nbits > 0) {
+ 		r->entropy_total += nbits;
+-		if (r->entropy_total > 128)
++		if (r->entropy_total > 128) {
+ 			r->initialized = 1;
++			if (r == &nonblocking_pool)
++				prandom_reseed_late();
++		}
+ 	}
+ 
+ 	trace_credit_entropy_bits(r->name, nbits, entropy_count,
+diff --git a/include/linux/random.h b/include/linux/random.h
+index bf9085e89fb5..5117ae348fe8 100644
+--- a/include/linux/random.h
++++ b/include/linux/random.h
+@@ -29,6 +29,7 @@ unsigned long randomize_range(unsigned long start, unsigned long end, unsigned l
+ u32 prandom_u32(void);
+ void prandom_bytes(void *buf, int nbytes);
+ void prandom_seed(u32 seed);
++void prandom_reseed_late(void);
+ 
+ u32 prandom_u32_state(struct rnd_state *);
+ void prandom_bytes_state(struct rnd_state *state, void *buf, int nbytes);
+diff --git a/lib/random32.c b/lib/random32.c
+index c2b6e62e7b7f..6fb48477901c 100644
+--- a/lib/random32.c
++++ b/lib/random32.c
+@@ -201,9 +201,18 @@ static void prandom_start_seed_timer(void)
+  *	Generate better values after random number generator
+  *	is fully initialized.
+  */
+-static int __init prandom_reseed(void)
++static void __prandom_reseed(bool late)
+ {
+ 	int i;
++	unsigned long flags;
++	static bool latch = false;
++	static DEFINE_SPINLOCK(lock);
++
++	/* only allow initial seeding (late == false) once */
++	spin_lock_irqsave(&lock, flags);
++	if (latch && !late)
++		goto out;
++	latch = true;
+ 
+ 	for_each_possible_cpu(i) {
+ 		struct rnd_state *state = &per_cpu(net_rand_state,i);
+@@ -217,6 +226,18 @@ static int __init prandom_reseed(void)
+ 		/* mix it in */
+ 		prandom_u32_state(state);
+ 	}
++out:
++	spin_unlock_irqrestore(&lock, flags);
++}
++
++void prandom_reseed_late(void)
++{
++	__prandom_reseed(true);
++}
++
++static int __init prandom_reseed(void)
++{
++	__prandom_reseed(false);
+ 	prandom_start_seed_timer();
+ 	return 0;
+ }
+-- 
+2.22.0
+
