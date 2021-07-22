@@ -32,7 +32,7 @@ cd ..
 cp /compile/doc/chromeos/misc.414/misc/config.bloog-r91 /compile/source/linux-chromeos-4.14/.config
 /compile/doc/chromeos/misc.414/options/enable-docker-options.sh
 /compile/doc/chromeos/misc.414/options/enable-additional-options.sh
-#/compile/doc/chromeos/misc.414/options/remove-unused-options.sh
+/compile/doc/chromeos/misc.414/options/remove-unused-options.sh
 make olddefconfig
 make -j 2 bzImage modules
 cd tools/perf
