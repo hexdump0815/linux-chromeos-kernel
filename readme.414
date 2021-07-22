@@ -1,0 +1,72 @@
+# directories:
+# - /compile/doc/chromeos - the files in this dir
+# - /compile/source/linux-chromeos-4.14 - the kernel sources checked out from gitrepo
+# - /compile/result/chromeos - the resulting kernel, modules etc. tar.gz files
+# name: cos-414
+
+# IMPORTANT: this is work in progress and not yet ready to use!
+# status: not yet known
+# credits go to https://github.com/eballetbo/linux.git
+#        and to https://github.com/eballetbo/chromebooks.git
+
+# INFO: based on the tree commit: 49d2c603c1a51aa59e25e24829c4b196232c7589
+#                    from branch: release-R91-13904.B-chromeos-4.14
+#       required: apt-get install libelf-dev
+
+# patches:
+# none yet
+
+cp /compile/doc/chromeos/config.414 /compile/source/linux-chromeos-4.14/.config
+cd /compile/source/linux-chromeos-4.14
+# adjust the intel ucode firmware path
+sed -i 's,/build/octopus,,g' .config
+
+# get and bild the efi bootstub - required: apt-get install gnu-efi
+git clone --depth 1 -b release-R91-13904.B https://chromium.googlesource.com/chromiumos/third_party/bootstub
+cd bootstub
+make PREFIX=""
+cd ..
+
+#make defconfig
+# better use the real r91 config of bloog as base
+cp /compile/doc/chromeos/misc.414/misc/config.bloog-r91 /compile/source/linux-chromeos-4.14/.config
+/compile/doc/chromeos/misc.414/options/enable-docker-options.sh
+/compile/doc/chromeos/misc.414/options/enable-additional-options.sh
+#/compile/doc/chromeos/misc.414/options/remove-unused-options.sh
+make olddefconfig
+make -j 2 bzImage modules
+cd tools/perf
+make
+cd ../power/cpupower
+make
+cd ../../..
+export kver=`make kernelrelease`
+echo ${kver}
+# remove debug info if there and not wanted
+#find . -type f -name '*.ko' | sudo xargs -n 1 objcopy --strip-unneeded
+make modules_install
+mkdir -p /lib/modules/${kver}/tools
+cp -v tools/perf/perf /lib/modules/${kver}/tools
+cp -v tools/power/cpupower/cpupower /lib/modules/${kver}/tools
+cp -v tools/power/cpupower/libcpupower.so.0.0.1 /lib/modules/${kver}/tools/libcpupower.so.0
+# make headers_install INSTALL_HDR_PATH=/usr
+cp -v .config /boot/config-${kver}
+cp -v arch/x86_64/boot/bzImage /boot/bzImage-${kver}
+cp -v System.map /boot/System.map-${kver}
+# start chromebook special - required: apt-get install liblz4-tool vboot-kernel-utils
+cp arch/x86_64/boot/bzImage bzImage
+cp /compile/doc/chromeos/misc.414/misc/cmdline cmdline
+# for console via usb srial adapter - see: https://github.com/Sonicadvance1/linux/issues/27#issuecomment-823668871
+# cp /compile/doc/chromeos/misc.414/misc/cmdline.usb cmdline
+cp bootstub/bootstub.efi bootstub.efi
+vbutil_kernel --pack vmlinux.kpart --keyblock /usr/share/vboot/devkeys/kernel.keyblock --signprivate /usr/share/vboot/devkeys/kernel_data_key.vbprivk --version 1 --config cmdline --bootloader bootstub.efi --vmlinuz bzImage --arch x86_64
+cp -v vmlinux.kpart /boot/vmlinux.kpart-${kver}
+rm -f bzImage cmdline bootstub.efi kernel.itb vmlinux.kpart
+# end chromebook special
+cd /boot
+update-initramfs -c -k ${kver}
+tar cvzf /compile/source/linux-chromeos-4.14/${kver}.tar.gz /boot/*-${kver} /lib/modules/${kver}
+cp -v /compile/doc/chromeos/config.414 /compile/doc/chromeos/config.414.old
+cp -v /compile/source/linux-chromeos-4.14/.config /compile/doc/chromeos/config.414
+cp -v /compile/source/linux-chromeos-4.14/.config /compile/doc/chromeos/config.414-${kver}
+cp -v /compile/source/linux-chromeos-4.14/*.tar.gz /compile/result/chromeos
