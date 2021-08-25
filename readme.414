@@ -21,7 +21,7 @@ cd /compile/source/linux-chromeos-4.14
 # adjust the intel ucode firmware path
 sed -i 's,/build/octopus,,g' .config
 
-# get and bild the efi bootstub - required: apt-get install gnu-efi
+# get and build the efi bootstub - required: apt-get install gnu-efi
 git clone --depth 1 -b release-R91-13904.B https://chromium.googlesource.com/chromiumos/third_party/bootstub
 cd bootstub
 make PREFIX=""
