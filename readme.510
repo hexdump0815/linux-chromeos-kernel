@@ -1,0 +1,69 @@
+# directories:
+# - /compile/doc/chromeos - the files in this dir
+# - /compile/source/linux-chromeos-5.10 - the kernel sources checked out from gitrepo
+# - /compile/result/chromeos - the resulting kernel, modules etc. tar.gz files
+# name: cos-510
+
+# IMPORTANT: this is work in progress and not yet ready to use!
+# status: not yet known
+# credits go to https://github.com/eballetbo/linux.git
+#        and to https://github.com/eballetbo/chromebooks.git
+#        and to https://github.com/cb-linux/breath
+
+# INFO: based on the tree commit: e5740beba59b069441c09569a7d6adfd1a80d562
+#                    from branch: release-R102-14695.B-chromeos-5.10
+#       required: apt-get install libelf-dev
+
+# patches:
+# none yet
+
+cd /compile/source/linux-chromeos-5.10
+
+# get and build the efi bootstub - required: apt-get install gnu-efi
+git clone --depth 1 -b release-R91-13904.B https://chromium.googlesource.com/chromiumos/third_party/bootstub
+cd bootstub
+make PREFIX=""
+cd ..
+
+cp /compile/doc/chromeos/misc.510/misc/kernel.conf.adjusted /compile/source/linux-chromeos-5.10/.config
+# those were not yet used during the initial tests
+#/compile/doc/chromeos/misc.510/options/enable-docker-options.sh
+#/compile/doc/chromeos/misc.510/options/enable-additional-options.sh
+#/compile/doc/chromeos/misc.510/options/remove-unused-options.sh
+make olddefconfig
+make -j 4 bzImage modules
+cd tools/perf
+make
+cd ../power/cpupower
+make
+cd ../../..
+export kver=`make kernelrelease`
+echo ${kver}
+# remove debug info if there and not wanted
+#find . -type f -name '*.ko' | sudo xargs -n 1 objcopy --strip-unneeded
+make modules_install
+mkdir -p /lib/modules/${kver}/tools
+cp -v tools/perf/perf /lib/modules/${kver}/tools
+cp -v tools/power/cpupower/cpupower /lib/modules/${kver}/tools
+cp -v tools/power/cpupower/libcpupower.so.0.0.1 /lib/modules/${kver}/tools/libcpupower.so.0
+# make headers_install INSTALL_HDR_PATH=/usr
+cp -v .config /boot/config-${kver}
+cp -v arch/x86_64/boot/bzImage /boot/bzImage-${kver}
+cp -v System.map /boot/System.map-${kver}
+# start chromebook special - required: apt-get install liblz4-tool vboot-kernel-utils
+cp arch/x86_64/boot/bzImage bzImage
+cp /compile/doc/chromeos/misc.510/misc/cmdline cmdline
+# for console via usb srial adapter - see: https://github.com/Sonicadvance1/linux/issues/27#issuecomment-823668871
+# cp /compile/doc/chromeos/misc.510/misc/cmdline.usb cmdline
+cp bootstub/bootstub.efi bootstub.efi
+vbutil_kernel --pack vmlinux.kpart --keyblock /usr/share/vboot/devkeys/kernel.keyblock --signprivate /usr/share/vboot/devkeys/kernel_data_key.vbprivk --version 1 --config cmdline --bootloader bootstub.efi --vmlinuz bzImage --arch x86_64
+cp -v vmlinux.kpart /boot/vmlinux.kpart-${kver}
+rm -f bzImage cmdline bootstub.efi kernel.itb vmlinux.kpart
+# end chromebook special
+cd /boot
+update-initramfs -c -k ${kver}
+tar cvzf /compile/source/linux-chromeos-5.10/${kver}.tar.gz /boot/*-${kver} /lib/modules/${kver}
+cp -v /compile/doc/chromeos/config.510 /compile/doc/chromeos/config.510.old
+cp -v /compile/source/linux-chromeos-5.10/.config /compile/doc/chromeos/config.510
+cp -v /compile/source/linux-chromeos-5.10/.config /compile/doc/chromeos/config.510-${kver}
+cp -v /compile/source/linux-chromeos-5.10/*.tar.gz /compile/result/chromeos
