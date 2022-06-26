@@ -1,0 +1,12 @@
+diff --git a/drivers/media/platform/mtk-mdp3/Makefile b/drivers/media/platform/mtk-mdp3/Makefile
+index 3c1ccb36e..0112a09a1 100755
+--- a/drivers/media/platform/mtk-mdp3/Makefile
++++ b/drivers/media/platform/mtk-mdp3/Makefile
+@@ -1,4 +1,7 @@
+ # SPDX-License-Identifier: GPL-2.0
++
++KBUILD_CFLAGS += -Wno-parentheses
++
+ mtk-mdp3-y += mtk-mdp3-core.o mtk-mdp3-vpu.o mtk-mdp3-regs.o
+ mtk-mdp3-y += mtk-mdp3-m2m.o
+ mtk-mdp3-y += mtk-mdp3-comp.o mtk-mdp3-cmdq.o
