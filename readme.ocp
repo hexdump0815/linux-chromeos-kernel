@@ -1,8 +1,8 @@
 # directories:
 # - /compile/doc/chromeos - the files in this dir
-# - /compile/source/linux-chromeos-5.10 - the kernel sources checked out from gitrepo
+# - /compile/source/linux-chromeos-ocp - the kernel sources checked out from gitrepo
 # - /compile/result/chromeos - the resulting kernel, modules etc. tar.gz files
-# name: cos-510
+# name: cos-102
 
 # IMPORTANT: this is work in progress and not yet ready to use!
 # status: not yet known
@@ -14,7 +14,7 @@
 #                    from branch: release-R102-14695.B-chromeos-5.10
 #       required: apt-get install libelf-dev
 
-cd /compile/source/linux-chromeos-5.10
+cd /compile/source/linux-chromeos-ocp
 
 # get and build the efi bootstub - required: apt-get install gnu-efi
 git clone --depth 1 -b release-R91-13904.B https://chromium.googlesource.com/chromiumos/third_party/bootstub
@@ -24,20 +24,20 @@ cd ..
 
 # patches
 # fix bloog audio
-patch -p1 < /compile/doc/chromeos/misc.510/patches/bloog-audio.patch
+patch -p1 < /compile/doc/chromeos/misc.ocp/patches/bloog-audio.patch
 
 #export ARCH=x86
 # the kernel config is not yet arch/x86/configs/x86_64_defconfig based - instead an
 # adjusted version of the chromeos kernel config is used as starting point for now
-scripts/kconfig/merge_config.sh -m /compile/doc/chromeos/misc.510/misc/config-droid-cros-olddefconfig-adjusted /compile/doc/kernel-config-options/chromebooks-x86_64.cfg /compile/doc/kernel-config-options/docker-options.cfg /compile/doc/kernel-config-options/options-to-remove-generic.cfg /compile/doc/chromeos/misc.510/options/options-to-remove-special.cfg /compile/doc/kernel-config-options/additional-options-generic.cfg /compile/doc/chromeos/misc.510/options/additional-options-special.cfg
-( cd /compile/doc/kernel-config-options ; git rev-parse --verify HEAD ) > /compile/doc/chromeos/misc.510/options/kernel-config-options.version
+scripts/kconfig/merge_config.sh -m /compile/doc/chromeos/misc.ocp/misc/config-droid-cros-olddefconfig-adjusted /compile/doc/kernel-config-options/chromebooks-x86_64.cfg /compile/doc/kernel-config-options/docker-options.cfg /compile/doc/kernel-config-options/options-to-remove-generic.cfg /compile/doc/chromeos/misc.ocp/options/options-to-remove-special.cfg /compile/doc/kernel-config-options/additional-options-generic.cfg /compile/doc/chromeos/misc.ocp/options/additional-options-special.cfg
+( cd /compile/doc/kernel-config-options ; git rev-parse --verify HEAD ) > /compile/doc/chromeos/misc.ocp/options/kernel-config-options.version
 # old approach: using a cros config based with some required adjustments as a starting point
-#cp /compile/doc/chromeos/misc.510/misc/config-droid-cros-olddefconfig-adjusted .config
+#cp /compile/doc/chromeos/misc.ocp/misc/config-droid-cros-olddefconfig-adjusted .config
 # older approach: use old style kernel config option handling
 # those were not yet used during the initial tests
-#/compile/doc/chromeos/misc.510/options/enable-docker-options.sh
-#/compile/doc/chromeos/misc.510/options/enable-additional-options.sh
-#/compile/doc/chromeos/misc.510/options/remove-unused-options.sh
+#/compile/doc/chromeos/misc.ocp/options/enable-docker-options.sh
+#/compile/doc/chromeos/misc.ocp/options/enable-additional-options.sh
+#/compile/doc/chromeos/misc.ocp/options/remove-unused-options.sh
 make olddefconfig
 make -j 4 bzImage modules
 cd tools/perf
@@ -60,9 +60,9 @@ cp -v arch/x86_64/boot/bzImage /boot/bzImage-${kver}
 cp -v System.map /boot/System.map-${kver}
 # start chromebook special - required: apt-get install liblz4-tool vboot-kernel-utils
 cp arch/x86_64/boot/bzImage bzImage
-cp /compile/doc/chromeos/misc.510/misc/cmdline cmdline
+cp /compile/doc/chromeos/misc.ocp/misc/cmdline cmdline
 # for console via usb srial adapter - see: https://github.com/Sonicadvance1/linux/issues/27#issuecomment-823668871
-# cp /compile/doc/chromeos/misc.510/misc/cmdline.usb cmdline
+# cp /compile/doc/chromeos/misc.ocp/misc/cmdline.usb cmdline
 cp bootstub/bootstub.efi bootstub.efi
 vbutil_kernel --pack vmlinux.kpart --keyblock /usr/share/vboot/devkeys/kernel.keyblock --signprivate /usr/share/vboot/devkeys/kernel_data_key.vbprivk --version 1 --config cmdline --bootloader bootstub.efi --vmlinuz bzImage --arch x86_64
 cp -v vmlinux.kpart /boot/vmlinux.kpart-${kver}
@@ -70,8 +70,8 @@ rm -f bzImage cmdline bootstub.efi kernel.itb vmlinux.kpart
 # end chromebook special
 cd /boot
 update-initramfs -c -k ${kver}
-tar cvzf /compile/source/linux-chromeos-5.10/${kver}.tar.gz /boot/*-${kver} /lib/modules/${kver}
-cp -v /compile/doc/chromeos/config.510 /compile/doc/chromeos/config.510.old
-cp -v /compile/source/linux-chromeos-5.10/.config /compile/doc/chromeos/config.510
-cp -v /compile/source/linux-chromeos-5.10/.config /compile/doc/chromeos/config.510-${kver}
-cp -v /compile/source/linux-chromeos-5.10/*.tar.gz /compile/result/chromeos
+tar cvzf /compile/source/linux-chromeos-ocp/${kver}.tar.gz /boot/*-${kver} /lib/modules/${kver}
+cp -v /compile/doc/chromeos/config.ocp /compile/doc/chromeos/config.ocp.old
+cp -v /compile/source/linux-chromeos-ocp/.config /compile/doc/chromeos/config.ocp
+cp -v /compile/source/linux-chromeos-ocp/.config /compile/doc/chromeos/config.ocp-${kver}
+cp -v /compile/source/linux-chromeos-ocp/*.tar.gz /compile/result/chromeos
