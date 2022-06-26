@@ -67,8 +67,20 @@ origin	https://chromium.googlesource.com/chromiumos/third_party/kernel/ (push)
 branch: release-R90-13816.B-chromeos-4.19
 git clone --depth 1 https://chromium.googlesource.com/chromiumos/third_party/kernel/ -b release-R90-13816.B-chromeos-4.19
 
+v5.4 tree:
+origin	https://chromium.googlesource.com/chromiumos/third_party/kernel/ (fetch)
+origin	https://chromium.googlesource.com/chromiumos/third_party/kernel/ (push)
+branch: release-R102-14695.B-chromeos-5.4
+# this is the version the chr cros spherion config in misc.asr/misc seems to be from
+git clone --depth 1 https://chromium.googlesource.com/chromiumos/third_party/kernel/ -b release-R93-14092.B-chromeos-5.4 linux-chromeos-asr
+# this is the version the trd cros lazor config in misc.trd/misc seems to be from
+git clone --depth 1 https://chromium.googlesource.com/chromiumos/third_party/kernel/ -b release-R94-14150.B-chromeos-5.4 linux-chromeos-trd
+
 v5.10 tree:
 origin	https://chromium.googlesource.com/chromiumos/third_party/kernel/ (fetch)
 origin	https://chromium.googlesource.com/chromiumos/third_party/kernel/ (push)
 branch: release-R102-14695.B-chromeos-5.10
-git clone --depth 1 https://chromium.googlesource.com/chromiumos/third_party/kernel/ -b release-R102-14695.B-chromeos-5.10
+# this is for the octopus intel kernel builds based on the latest v5.10 chromeos kernel sources
+git clone --depth 1 https://chromium.googlesource.com/chromiumos/third_party/kernel/ -b release-R102-14695.B-chromeos-5.10 linux-chromeos-ocp
+# this is the version the chr cros tomato config in misc.chr/misc seems to be from
+git clone --depth 1 https://chromium.googlesource.com/chromiumos/third_party/kernel/ -b release-R98-14388.B-chromeos-5.10 linux-chromeos-chr
