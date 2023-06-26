@@ -84,3 +84,10 @@ branch: release-R102-14695.B-chromeos-5.10
 git clone --depth 1 https://chromium.googlesource.com/chromiumos/third_party/kernel/ -b release-R102-14695.B-chromeos-5.10 linux-chromeos-ocp
 # this is the version the chr cros tomato config in misc.chr/misc seems to be from
 git clone --depth 1 https://chromium.googlesource.com/chromiumos/third_party/kernel/ -b release-R98-14388.B-chromeos-5.10 linux-chromeos-chr
+
+v5.15 tree:
+origin	https://chromium.googlesource.com/chromiumos/third_party/kernel/ (fetch)
+origin	https://chromium.googlesource.com/chromiumos/third_party/kernel/ (push)
+branch: release-R114-15437.B-chromeos-5.15
+# this is the version the col cros magneton config in misc.col/misc seems to be from
+git clone --depth 1 https://chromium.googlesource.com/chromiumos/third_party/kernel/ -b release-R114-15437.B-chromeos-5.15 linux-chromeos-col
