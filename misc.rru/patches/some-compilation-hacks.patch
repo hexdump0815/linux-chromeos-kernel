@@ -24,6 +24,61 @@ index 26e848525..22d6b4b6f 100644
  obj-$(CONFIG_VIDEO_MEDIATEK_JPEG) += mtk_jpeg.o \
  	mtk-jpeg-enc-hw.o \
  	mtk-jpeg-dec-hw.o
+diff --git a/drivers/memory/mediatek/Makefile b/drivers/memory/mediatek/Makefile
+index 982ec9a7f..5ff04efce 100644
+--- a/drivers/memory/mediatek/Makefile
++++ b/drivers/memory/mediatek/Makefile
+@@ -1,4 +1,6 @@
+ # SPDX-License-Identifier: GPL-2.0
+ # Core
++ccflags-y			+= -Wno-error=return-type
++
+ obj-$(CONFIG_MTK_SMPU)		+= smpu.o
+ obj-$(CONFIG_MTK_DRAMC)		+= mtk-dramc.o
+diff --git a/drivers/memory/mediatek/mtk-dramc.c b/drivers/memory/mediatek/mtk-dramc.c
+index 602c6feb1..ee4703827 100644
+--- a/drivers/memory/mediatek/mtk-dramc.c
++++ b/drivers/memory/mediatek/mtk-dramc.c
+@@ -44,11 +44,37 @@
+ #define APHY_ARDLL1_CK_EN	GENMASK(0, 0)
+ #define APHY_B0_TX0_SER_MODE	GENMASK(4, 3)
+ 
+-static unsigned int read_reg_field(void __iomem *base, unsigned int offset, unsigned int mask)
++static unsigned int read_reg_field(void __iomem *base, unsigned int offset, const int mask)
+ {
+ 	unsigned int val = readl(base + offset);
+ 
+-	return FIELD_GET(mask, val);
++	// return FIELD_GET(mask, val);
++	switch(mask) {
++		case DPHY_DVFS_SHU_LV:
++			return FIELD_GET(DPHY_DVFS_SHU_LV, val);
++			break;
++		case DPHY_DVFS_PLL_SEL:
++			return FIELD_GET(DPHY_DVFS_PLL_SEL, val);
++			break;
++		case APHY_PLL2_SDMPCW:
++			return FIELD_GET(APHY_PLL2_SDMPCW, val);
++			break;
++		case APHY_PLL3_POSDIV:
++			return FIELD_GET(APHY_PLL3_POSDIV, val);
++			break;
++		case APHY_PLL4_FBKSEL:
++			return FIELD_GET(APHY_PLL4_FBKSEL, val);
++			break;
++		case APHY_ARPI0_SOPEN:
++			return FIELD_GET(APHY_ARPI0_SOPEN, val);
++			break;
++		case APHY_ARDLL1_CK_EN:
++			return FIELD_GET(APHY_ARDLL1_CK_EN, val);
++			break;
++		case APHY_B0_TX0_SER_MODE:
++			return FIELD_GET(APHY_B0_TX0_SER_MODE, val);
++			break;
++	}
+ }
+ 
+ struct mtk_dramc_pdata {
 diff --git a/drivers/misc/mediatek/slbc/Makefile b/drivers/misc/mediatek/slbc/Makefile
 index 7d9cafa4c..dce14cb1c 100644
 --- a/drivers/misc/mediatek/slbc/Makefile
