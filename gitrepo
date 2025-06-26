@@ -91,3 +91,17 @@ origin	https://chromium.googlesource.com/chromiumos/third_party/kernel/ (push)
 branch: release-R114-15437.B-chromeos-5.15
 # this is the version the col cros magneton config in misc.col/misc seems to be from
 git clone --depth 1 https://chromium.googlesource.com/chromiumos/third_party/kernel/ -b release-R114-15437.B-chromeos-5.15 linux-chromeos-col
+
+v6.1 tree:
+origin	https://chromium.googlesource.com/chromiumos/third_party/kernel/ (fetch)
+origin	https://chromium.googlesource.com/chromiumos/third_party/kernel/ (push)
+branch: release-R137-16267.B-chromeos-6.1
+# this is the current stable version for ciri
+git clone --depth 1 https://chromium.googlesource.com/chromiumos/third_party/kernel/ -b release-R137-16267.B-chromeos-6.1 linux-chromeos-grt
+
+v6.6 tree:
+origin	https://chromium.googlesource.com/chromiumos/third_party/kernel/ (fetch)
+origin	https://chromium.googlesource.com/chromiumos/third_party/kernel/ (push)
+branch: release-R137-16267.B-chromeos-6.6
+# this is the current stable version for navi
+git clone --depth 1 https://chromium.googlesource.com/chromiumos/third_party/kernel/ -b release-R137-16267.B-chromeos-6.6 linux-chromeos-rru

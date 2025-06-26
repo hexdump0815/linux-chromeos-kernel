@@ -1,0 +1,13 @@
+diff --git a/drivers/soc/mediatek/apusys/Makefile b/drivers/soc/mediatek/apusys/Makefile
+index 493a1bb8a..5fced16ce 100644
+--- a/drivers/soc/mediatek/apusys/Makefile
++++ b/drivers/soc/mediatek/apusys/Makefile
+@@ -9,6 +9,8 @@ obj-$(CONFIG_MTK_APUSYS_SUPPORT) += mtk_apu_mdw.o
+ APUSYS_VERSION_MIDWARE = 2.0
+ 
+ # middleware makefile
++ccflags-y += -Wno-error=enum-int-mismatch
++ccflags-y += -Wno-error=unused-variable
+ ccflags-y += -I$(srctree)/drivers/soc/mediatek/apusys/midware/$(APUSYS_VERSION_MIDWARE)/
+ ccflags-y += -I$(srctree)/drivers/soc/mediatek/apusys/midware/$(APUSYS_VERSION_MIDWARE)/rv/
+ 
