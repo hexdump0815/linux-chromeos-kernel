@@ -1,0 +1,63 @@
+diff --git a/drivers/firmware/arm_scmi/tinysys.c b/drivers/firmware/arm_scmi/tinysys.c
+index dc4b643eb..aacd572e3 100644
+--- a/drivers/firmware/arm_scmi/tinysys.c
++++ b/drivers/firmware/arm_scmi/tinysys.c
+@@ -9,8 +9,8 @@
+ 
+ #include <linux/module.h>
+ #include <linux/scmi_protocol.h>
+-#include <common.h>
+-#include <notify.h>
++#include "common.h"
++#include "notify.h"
+ 
+ #include "tinysys-scmi.h"
+ 
+diff --git a/drivers/media/platform/mediatek/jpeg/Makefile b/drivers/media/platform/mediatek/jpeg/Makefile
+index 26e848525..22d6b4b6f 100644
+--- a/drivers/media/platform/mediatek/jpeg/Makefile
++++ b/drivers/media/platform/mediatek/jpeg/Makefile
+@@ -1,4 +1,6 @@
+ # SPDX-License-Identifier: GPL-2.0-only
++ccflags-y	+= -Wno-int-conversion
++
+ obj-$(CONFIG_VIDEO_MEDIATEK_JPEG) += mtk_jpeg.o \
+ 	mtk-jpeg-enc-hw.o \
+ 	mtk-jpeg-dec-hw.o
+diff --git a/drivers/misc/mediatek/slbc/Makefile b/drivers/misc/mediatek/slbc/Makefile
+index 7d9cafa4c..dce14cb1c 100644
+--- a/drivers/misc/mediatek/slbc/Makefile
++++ b/drivers/misc/mediatek/slbc/Makefile
+@@ -1,6 +1,7 @@
+ # SPDX-License-Identifier: (GPL-2.0 OR MIT)
+ 
+ ccflags-y += \
++	-Wno-error=parentheses \
+ 	-I$(srctree)/drivers/misc/mediatek/include \
+ 	-I$(srctree)/drivers/misc/mediatek/include/mt-plat \
+ 	-I$(srctree)/drivers/misc/mediatek/sspm \
+diff --git a/drivers/rtc/Makefile b/drivers/rtc/Makefile
+index 51bf51cb7..586455558 100644
+--- a/drivers/rtc/Makefile
++++ b/drivers/rtc/Makefile
+@@ -4,6 +4,7 @@
+ #
+ 
+ ccflags-$(CONFIG_RTC_DEBUG)	:= -DDEBUG
++ccflags-y			+= -Wno-error=unused-variable
+ 
+ obj-$(CONFIG_RTC_LIB)		+= lib.o
+ obj-$(CONFIG_RTC_CLASS)		+= rtc-core.o
+diff --git a/drivers/soc/mediatek/apusys/Makefile b/drivers/soc/mediatek/apusys/Makefile
+index a1fbf41df..da2be08cc 100644
+--- a/drivers/soc/mediatek/apusys/Makefile
++++ b/drivers/soc/mediatek/apusys/Makefile
+@@ -8,6 +8,8 @@ obj-$(CONFIG_MTK_APUSYS_SUPPORT) += power/
+ APUSYS_PATH="$(srctree)/$(DEVICE_MODULES_REL_DIR)/drivers/soc/mediatek/apusys"
+ 
+ # midware
++ccflags-y += -Wno-error=enum-int-mismatch
++ccflags-y += -Wno-error=unused-variable
+ ccflags-y += -I$(APUSYS_PATH)/midware/2.0/
+ ccflags-y += -I$(APUSYS_PATH)/midware/2.0/rv/
+ ccflags-y += -I$(APUSYS_PATH)/midware/2.0/ext/
