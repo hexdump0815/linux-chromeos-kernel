@@ -48,7 +48,7 @@ cp -v System.map /boot/System.map-${kver}
 cp arch/arm64/boot/Image Image
 lz4 -f Image Image.lz4
 cp /compile/doc/chromeos/misc.grt/misc/cmdline cmdline
-# for console via usb srial adapter - see: https://github.com/Sonicadvance1/linux/issues/27#issuecomment-823668871
+# for console via usb serial adapter - see: https://github.com/Sonicadvance1/linux/issues/27#issuecomment-823668871
 # cp /compile/doc/chromeos/misc.grt/misc/cmdline.usb cmdline
 dd if=/dev/zero of=bootloader.bin bs=512 count=1
 ls arch/arm64/boot/dts/mediatek/mt8188-*.dtb | xargs printf " -b %s" | xargs mkimage -D "-I dts -O dtb -p 2048" -f auto -A arm64 -O linux -T kernel -C lz4 -a 0 -d Image.lz4 kernel.itb

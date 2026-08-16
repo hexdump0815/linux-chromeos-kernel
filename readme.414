@@ -56,7 +56,7 @@ cp -v System.map /boot/System.map-${kver}
 # start chromebook special - required: apt-get install liblz4-tool vboot-kernel-utils
 cp arch/x86_64/boot/bzImage bzImage
 cp /compile/doc/chromeos/misc.414/misc/cmdline cmdline
-# for console via usb srial adapter - see: https://github.com/Sonicadvance1/linux/issues/27#issuecomment-823668871
+# for console via usb serial adapter - see: https://github.com/Sonicadvance1/linux/issues/27#issuecomment-823668871
 # cp /compile/doc/chromeos/misc.414/misc/cmdline.usb cmdline
 cp bootstub/bootstub.efi bootstub.efi
 vbutil_kernel --pack vmlinux.kpart --keyblock /usr/share/vboot/devkeys/kernel.keyblock --signprivate /usr/share/vboot/devkeys/kernel_data_key.vbprivk --version 1 --config cmdline --bootloader bootstub.efi --vmlinuz bzImage --arch x86_64
