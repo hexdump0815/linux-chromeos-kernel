@@ -1,0 +1,161 @@
+diff --git a/drivers/firmware/arm_scmi/tinysys.c b/drivers/firmware/arm_scmi/tinysys.c
+index dc4b643eb..aacd572e3 100644
+--- a/drivers/firmware/arm_scmi/tinysys.c
++++ b/drivers/firmware/arm_scmi/tinysys.c
+@@ -9,8 +9,8 @@
+ 
+ #include <linux/module.h>
+ #include <linux/scmi_protocol.h>
+-#include <common.h>
+-#include <notify.h>
++#include "common.h"
++#include "notify.h"
+ 
+ #include "tinysys-scmi.h"
+ 
+diff --git a/drivers/media/platform/mediatek/jpeg/Makefile b/drivers/media/platform/mediatek/jpeg/Makefile
+index 26e848525..22d6b4b6f 100644
+--- a/drivers/media/platform/mediatek/jpeg/Makefile
++++ b/drivers/media/platform/mediatek/jpeg/Makefile
+@@ -1,4 +1,6 @@
+ # SPDX-License-Identifier: GPL-2.0-only
++ccflags-y	+= -Wno-int-conversion
++
+ obj-$(CONFIG_VIDEO_MEDIATEK_JPEG) += mtk_jpeg.o \
+ 	mtk-jpeg-enc-hw.o \
+ 	mtk-jpeg-dec-hw.o
+diff --git a/drivers/memory/mediatek/Makefile b/drivers/memory/mediatek/Makefile
+index 982ec9a7f..5ff04efce 100644
+--- a/drivers/memory/mediatek/Makefile
++++ b/drivers/memory/mediatek/Makefile
+@@ -1,4 +1,6 @@
+ # SPDX-License-Identifier: GPL-2.0
+ # Core
++ccflags-y			+= -Wno-error=return-type
++
+ obj-$(CONFIG_MTK_SMPU)		+= smpu.o
+ obj-$(CONFIG_MTK_DRAMC)		+= mtk-dramc.o
+diff --git a/drivers/memory/mediatek/mtk-dramc.c b/drivers/memory/mediatek/mtk-dramc.c
+index 602c6feb1..ee4703827 100644
+--- a/drivers/memory/mediatek/mtk-dramc.c
++++ b/drivers/memory/mediatek/mtk-dramc.c
+@@ -44,11 +44,37 @@
+ #define APHY_ARDLL1_CK_EN	GENMASK(0, 0)
+ #define APHY_B0_TX0_SER_MODE	GENMASK(4, 3)
+ 
+-static unsigned int read_reg_field(void __iomem *base, unsigned int offset, unsigned int mask)
++static unsigned int read_reg_field(void __iomem *base, unsigned int offset, const int mask)
+ {
+ 	unsigned int val = readl(base + offset);
+ 
+-	return FIELD_GET(mask, val);
++	// return FIELD_GET(mask, val);
++	switch(mask) {
++		case DPHY_DVFS_SHU_LV:
++			return FIELD_GET(DPHY_DVFS_SHU_LV, val);
++			break;
++		case DPHY_DVFS_PLL_SEL:
++			return FIELD_GET(DPHY_DVFS_PLL_SEL, val);
++			break;
++		case APHY_PLL2_SDMPCW:
++			return FIELD_GET(APHY_PLL2_SDMPCW, val);
++			break;
++		case APHY_PLL3_POSDIV:
++			return FIELD_GET(APHY_PLL3_POSDIV, val);
++			break;
++		case APHY_PLL4_FBKSEL:
++			return FIELD_GET(APHY_PLL4_FBKSEL, val);
++			break;
++		case APHY_ARPI0_SOPEN:
++			return FIELD_GET(APHY_ARPI0_SOPEN, val);
++			break;
++		case APHY_ARDLL1_CK_EN:
++			return FIELD_GET(APHY_ARDLL1_CK_EN, val);
++			break;
++		case APHY_B0_TX0_SER_MODE:
++			return FIELD_GET(APHY_B0_TX0_SER_MODE, val);
++			break;
++	}
+ }
+ 
+ struct mtk_dramc_pdata {
+diff --git a/drivers/misc/mediatek/slbc/Makefile b/drivers/misc/mediatek/slbc/Makefile
+index 7d9cafa4c..dce14cb1c 100644
+--- a/drivers/misc/mediatek/slbc/Makefile
++++ b/drivers/misc/mediatek/slbc/Makefile
+@@ -1,6 +1,7 @@
+ # SPDX-License-Identifier: (GPL-2.0 OR MIT)
+ 
+ ccflags-y += \
++	-Wno-error=parentheses \
+ 	-I$(srctree)/drivers/misc/mediatek/include \
+ 	-I$(srctree)/drivers/misc/mediatek/include/mt-plat \
+ 	-I$(srctree)/drivers/misc/mediatek/sspm \
+diff --git a/drivers/rtc/Makefile b/drivers/rtc/Makefile
+index 51bf51cb7..586455558 100644
+--- a/drivers/rtc/Makefile
++++ b/drivers/rtc/Makefile
+@@ -4,6 +4,7 @@
+ #
+ 
+ ccflags-$(CONFIG_RTC_DEBUG)	:= -DDEBUG
++ccflags-y			+= -Wno-error=unused-variable
+ 
+ obj-$(CONFIG_RTC_LIB)		+= lib.o
+ obj-$(CONFIG_RTC_CLASS)		+= rtc-core.o
+diff --git a/drivers/soc/mediatek/apusys/Makefile b/drivers/soc/mediatek/apusys/Makefile
+index a1fbf41df..da2be08cc 100644
+--- a/drivers/soc/mediatek/apusys/Makefile
++++ b/drivers/soc/mediatek/apusys/Makefile
+@@ -8,6 +8,8 @@ obj-$(CONFIG_MTK_APUSYS_SUPPORT) += power/
+ APUSYS_PATH="$(srctree)/$(DEVICE_MODULES_REL_DIR)/drivers/soc/mediatek/apusys"
+ 
+ # midware
++ccflags-y += -Wno-error=enum-int-mismatch
++ccflags-y += -Wno-error=unused-variable
+ ccflags-y += -I$(APUSYS_PATH)/midware/2.0/
+ ccflags-y += -I$(APUSYS_PATH)/midware/2.0/rv/
+ ccflags-y += -I$(APUSYS_PATH)/midware/2.0/ext/
+diff --git a/drivers/gpu/drm/mediatek/Makefile b/drivers/gpu/drm/mediatek/Makefile
+index 12c64a38a..fb617953a 100644
+--- a/drivers/gpu/drm/mediatek/Makefile
++++ b/drivers/gpu/drm/mediatek/Makefile
+@@ -1,5 +1,7 @@
+ # SPDX-License-Identifier: GPL-2.0
+ 
++ccflags-y += -Wno-error=unused-value
++
+ ccflags-$(CONFIG_DRM_MEDIATEK_DEBUG) := -DDEBUG
+ 
+ mediatek-drm-y := mtk_crtc.o \
+diff --git a/drivers/gpu/drm/bridge/Makefile b/drivers/gpu/drm/bridge/Makefile
+index ff0c830ef..c30dc584c 100644
+--- a/drivers/gpu/drm/bridge/Makefile
++++ b/drivers/gpu/drm/bridge/Makefile
+@@ -39,3 +39,5 @@ obj-y += analogix/
+ obj-y += cadence/
+ obj-y += imx/
+ obj-y += synopsys/
++
++ccflags-y += -Wno-error=parentheses
+diff --git a/drivers/remoteproc/mtk_vcp_rproc.c b/drivers/remoteproc/mtk_vcp_rproc.c
+index 9b14cf98d..5028fde03 100644
+--- a/drivers/remoteproc/mtk_vcp_rproc.c
++++ b/drivers/remoteproc/mtk_vcp_rproc.c
+@@ -21,6 +21,7 @@
+ #include <linux/suspend.h>
+ #include <linux/slab.h>
+ #include <linux/timer.h>
++#include <linux/types.h>
+ #include <linux/vmalloc.h>
+ #include <linux/remoteproc.h>
+ #include <linux/rpmsg/mtk_rpmsg.h>
+@@ -410,7 +411,7 @@ static void vcp_A_notify_ws(struct work_struct *ws)
+ 	if (core_id < VCP_CORE_TOTAL) {
+ 		mutex_lock(&vcp_ready_mutex);
+ 		vcp_ready[core_id] = 1;
+-		vcp_ipidev.prdata = core_id;
++		vcp_ipidev.prdata = (void *)(uintptr_t)core_id;
+ 		mutex_unlock(&vcp_ready_mutex);
+ 
+ 		mutex_lock(&vcp_A_notify_mutex);

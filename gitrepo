@@ -103,5 +103,8 @@ v6.6 tree:
 origin	https://chromium.googlesource.com/chromiumos/third_party/kernel/ (fetch)
 origin	https://chromium.googlesource.com/chromiumos/third_party/kernel/ (push)
 branch: release-R137-16267.B-chromeos-6.6
-# this is the current stable version for navi
+# this is the current stable version for navi = mt8196
 git clone --depth 1 https://chromium.googlesource.com/chromiumos/third_party/kernel/ -b release-R137-16267.B-chromeos-6.6 linux-chromeos-rru
+# this is the current stable version for skywalker = mt8189
+branch: release-R150-16700.B-chromeos-6.6
+git clone --depth 1 https://chromium.googlesource.com/chromiumos/third_party/kernel/ -b release-R150-16700.B-chromeos-6.6 linux-chromeos-skw
